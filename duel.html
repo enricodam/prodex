@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROD-EX Duello (beta)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0a18;--panel:#1b1838;--panel2:#241f4a;--ink:#ece9ff;--dim:#9a93c8;--gold:#f4c95d;--blue:#4f8be8;--red:#e0566a;--green:#5bc77f;--purple:#9b6ff0;--line:#3a3470;--shadow:#070612}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;max-width:100%;overflow-x:hidden}
+html{-webkit-text-size-adjust:100%}
+body{background:radial-gradient(circle at 20% 0%,#1a1640 0,transparent 55%),radial-gradient(circle at 90% 100%,#2a1640 0,transparent 50%),var(--bg);color:var(--ink);font-family:'VT323',monospace;font-size:20px;image-rendering:pixelated}
+canvas{image-rendering:pixelated}
+.head{font-family:'Press Start 2P',monospace;letter-spacing:1px}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:999;background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+.wrap{max-width:1100px;margin:0 auto;padding:12px}
+button{font-family:'Press Start 2P';font-size:10px;color:var(--ink);background:var(--panel2);border:3px solid #000;box-shadow:0 4px 0 #000,inset 0 0 0 2px rgba(255,255,255,.08);padding:9px 11px;cursor:pointer}
+button:hover{filter:brightness(1.18)}button:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+button:disabled{opacity:.38;cursor:not-allowed;filter:grayscale(.6)}
+.btn-gold{background:#5a4410;color:var(--gold)}.btn-blue{background:#1c3360;color:#bcd6ff}.btn-red{background:#5a1822;color:#ffc2cc}.btn-green{background:#143d24;color:#bdfacf}
+.mini{font-family:'VT323';font-size:17px;color:var(--dim)}
+.pixel-border{border:3px solid #000;box-shadow:0 0 0 3px var(--line),0 6px 0 3px var(--shadow);background:var(--panel)}
+.hidden{display:none!important}a{color:var(--blue)}
+.tinp{font-family:'VT323';font-size:18px;background:#0d0b20;color:var(--ink);border:3px solid #000;box-shadow:inset 0 0 0 2px var(--line);padding:8px 10px;width:100%}
+
+#intro{text-align:center;padding:30px 12px}
+#intro h1{font-size:clamp(20px,5vw,40px);color:var(--gold);text-shadow:3px 3px 0 #000;margin:0 0 6px}
+#intro .sub{color:var(--purple);margin:6px 0 14px}
+
+.topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px 12px;margin-bottom:10px;flex-wrap:wrap}
+.stat{font-family:'Press Start 2P';font-size:11px;display:flex;align-items:center;gap:6px}
+.stat small{font-family:'VT323';font-size:17px;color:var(--dim)}
+
+.boss{display:flex;gap:12px;align-items:center;padding:10px 12px;margin-bottom:10px}
+.boss .bn{font-family:'Press Start 2P';font-size:13px;color:var(--red)}
+.hpbar{height:16px;background:#0d0b20;border:2px solid #000;box-shadow:inset 0 0 0 1px var(--line);margin-top:6px}
+.hpfill{height:100%;background:linear-gradient(90deg,#e0566a,#8a2230)}
+.intent{font-family:'Press Start 2P';font-size:10px;padding:7px 9px;border:3px solid #000;box-shadow:0 3px 0 #000;background:#3a1430;color:#ffb0d8;white-space:nowrap}
+.intent.atk{background:#5a1822}.intent.sum{background:#1c3360;color:#bcd6ff}.intent.buf{background:#5a4410;color:var(--gold)}
+
+.boardrow{display:flex;gap:8px;flex-wrap:wrap;min-height:56px;padding:8px;align-items:center}
+.boardlabel{font-family:'Press Start 2P';font-size:9px;color:var(--dim);margin:8px 0 2px}
+.stepGuide{font-family:'Press Start 2P';font-size:8.5px;text-align:center;padding:7px 6px;margin-bottom:8px;color:var(--dim);border:3px solid #000;box-shadow:0 3px 0 #000;background:#161232}
+
+.dtoken{width:64px;padding:4px;text-align:center;cursor:pointer;background:linear-gradient(#241f4a,#161232);border:3px solid #000;box-shadow:0 0 0 2px var(--cf),0 4px 0 #000;position:relative}
+.dtoken.tapped{opacity:.5;filter:grayscale(.6)}.dtoken.sick{box-shadow:0 0 0 2px #555,0 4px 0 #000}
+.dtoken.sel{box-shadow:0 0 0 3px var(--gold),0 4px 0 #000;transform:translateY(-4px)}
+.dtoken.block{box-shadow:0 0 0 3px var(--blue),0 4px 0 #000}
+.dt-art{width:56px;height:44px;display:block;margin:0 auto}
+.dt-pt{font-family:'Press Start 2P';font-size:9px;color:#fff;margin-top:2px}.dt-pt .hurt{color:#ff8a8a}
+.dt-nm{font-family:'VT323';font-size:13px;color:var(--dim);line-height:1;height:24px;overflow:hidden}
+
+.appunti{display:flex;gap:6px;flex-wrap:wrap;min-height:44px;padding:4px}
+.appunto{min-width:78px;max-width:120px;padding:5px 7px;background:linear-gradient(#3a3320,#241f12);border:3px solid #000;box-shadow:0 0 0 2px #6a5012,0 3px 0 #000}
+.appunto .av{font-family:'Press Start 2P';font-size:10px;color:var(--gold)}
+.appunto .at{font-family:'VT323';font-size:14px;color:#e8dcc0;line-height:1.05}
+
+.hand{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-height:150px;padding-top:6px}
+.dcard{width:140px;background:#15112e;border:3px solid #000;box-shadow:0 0 0 3px var(--cf),0 5px 0 3px var(--shadow);cursor:pointer;transition:transform .07s;display:flex;flex-direction:column;overflow:hidden}
+.dcard:hover{transform:translateY(-6px)}.dcard.dis{opacity:.45;cursor:not-allowed}.dcard.sel{transform:translateY(-8px);box-shadow:0 0 0 3px var(--gold),0 5px 0 3px var(--shadow)}
+.dc-banner{display:flex;justify-content:space-between;align-items:center;background:var(--cd);padding:5px 6px}
+.dc-name{font-family:'Press Start 2P';font-size:7.5px;color:#fff;line-height:1.3}
+.dc-cost{font-family:'Press Start 2P';font-size:10px;color:#3a2a06;background:var(--gold);border:2px solid #000;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex:none;margin-left:4px}
+.dc-art{width:100%;height:84px;display:block;background:#0a0814}
+.dc-type{font-family:'VT323';font-size:13px;color:#fff;background:#2a2348;padding:2px 6px}
+.dc-text{font-family:'VT323';font-size:14px;color:#1a1730;background:#efe6cf;padding:5px 6px;flex:1;min-height:54px}
+.dc-pt{align-self:flex-end;font-family:'Press Start 2P';font-size:11px;color:#fff;background:var(--cd);border:2px solid #000;padding:3px 7px;margin:-16px 4px 4px}
+
+.controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.pomo{text-align:center;padding:10px}
+.clock{font-family:'Press Start 2P';font-size:30px;margin:6px 0}
+.bossface{cursor:pointer}.bossface.tgt{box-shadow:0 0 0 3px var(--gold),0 6px 0 3px var(--shadow)}
+.hint{font-family:'Press Start 2P';font-size:11px;color:#3a2a06;background:var(--gold);text-align:center;min-height:16px;margin:8px 0;padding:9px 10px;border:3px solid #000;box-shadow:0 3px 0 #000;line-height:1.4}
+@keyframes glow{50%{filter:brightness(1.35)}}
+#battle[data-mode="await"] .hand,#battle[data-mode="await"] #yourBoard{opacity:.45;pointer-events:none}
+#battle[data-mode="await"] #attackBtn,#battle[data-mode="await"] #endBtn{opacity:.35}
+#battle[data-mode="await"] #pomoBox{box-shadow:0 0 0 3px var(--gold),0 6px 0 3px var(--shadow);animation:glow 1.2s infinite}
+#battle[data-mode="play"] #pomoBox{opacity:.6}
+#battle[data-mode="block"] .hand,#battle[data-mode="block"] #pomoBox{opacity:.4;pointer-events:none}
+#battle[data-mode="block"] #confirmBlockBtn{animation:glow 1.2s infinite}
+.coach{box-shadow:0 0 0 4px var(--gold),0 6px 0 4px var(--shadow)!important;animation:glow 1.1s infinite}
+.log{height:92px;overflow:auto;background:#070613;border:3px solid #000;box-shadow:inset 0 0 0 2px var(--line);padding:6px 9px;font-family:'VT323';font-size:15px;margin-top:8px}
+.log p{margin:0 0 1px;color:#a7e0b0}.log p.warn{color:#ffb0c0}.log p.sys{color:var(--gold)}
+
+#overlay{position:relative;z-index:5;text-align:center;padding:20px;margin-top:10px}
+.reward{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+@media(max-width:600px){.dcard{width:46%}.dc-name{font-size:7px}.clock{font-size:26px}.boss{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="intro">
+    <h1 class="head">PROD-EX · DUELLO</h1>
+    <div class="sub head" style="font-size:11px">accademia arcana · roguelike</div>
+    <canvas id="introArt" width="120" height="84" style="width:240px;height:168px;margin:6px auto;display:block"></canvas>
+    <div class="mini" style="max-width:560px;margin:0 auto 14px">Sei un mago dell'Accademia. Ogni Pomodoro reale che completi diventa un <b>Appunto di Studio</b> (col tuo task), e gli Appunti sono il mana che evoca le creature. Affronti i nemici uno dopo l'altro: piu' lavori, piu' ne abbatti. Inizi con 5 creature in mano. Perdi quando il Vigore arriva a 0.</div>
+    <div class="pixel-border" style="max-width:560px;margin:0 auto 14px;text-align:left;padding:12px">
+      <div class="head" style="font-size:10px;color:var(--gold);margin-bottom:8px">COME FUNZIONA UN TURNO</div>
+      <div class="mini" style="font-size:18px;line-height:1.55">
+        1. Scrivi cosa fai e scegli la durata (5/10/15/25): parte un <b>Pomodoro</b> reale.<br>
+        2. A fine Pomodoro nasce un <b>Appunto</b> (mana) e peschi una carta.<br>
+        3. <b>Gioca</b> le carte spendendo Appunti, poi <b>attacca</b> il nemico.<br>
+        4. <b>Fine turno</b>: il nemico colpisce. Poi un altro Pomodoro per il turno dopo.<br>
+        <span style="color:var(--dim)">Gli Appunti restano e si accumulano: piu' lavori, piu' diventi forte.</span>
+      </div>
+    </div>
+    <div id="ritualBox" class="pixel-border" style="max-width:560px;margin:0 auto 14px;padding:12px"></div>
+    <div class="controls"><button id="beginBtn" class="btn-gold head" style="font-size:14px;padding:13px 18px">▶ INIZIA LA GIORNATA</button></div>
+    <div class="mini" style="margin-top:10px"><a href="index.html">◀ torna alla modalita' Classica</a></div>
+  </div>
+
+  <div id="battle" class="hidden">
+    <div class="topbar pixel-border">
+      <div class="stat">📓 <span style="color:var(--gold)" id="manaN">0</span><small>Appunti (mana)</small></div>
+      <div class="stat">♥ <span style="color:var(--red)" id="vigorN">32</span><small>Vigore</small></div>
+      <div class="stat">☠ <span id="bossN">0</span><small>sconfitti</small></div>
+      <div class="stat">⛏ <span id="turnN">0</span><small>turno</small></div>
+      <button id="sndBtn" style="font-size:8px">♪ ON</button>
+    </div>
+
+    <div class="stepGuide head"><span id="st1">1 POMODORO</span> &nbsp;▶&nbsp; <span id="st2">2 GIOCA</span> &nbsp;▶&nbsp; <span id="st3">3 ATTACCA</span> &nbsp;▶&nbsp; <span id="st4">4 FINE TURNO</span></div>
+
+    <div class="boss pixel-border" id="bossWrap">
+      <canvas id="bossArt" width="72" height="60" style="width:72px;height:60px" class="bossface"></canvas>
+      <div style="flex:1">
+        <div class="bn" id="bossName">Compito in Classe</div>
+        <div class="hpbar"><div class="hpfill" id="bossHp" style="width:100%"></div></div>
+        <div class="mini" id="bossHpText">18 / 18</div>
+      </div>
+      <div class="intent" id="intentBadge">Attacca</div>
+    </div>
+
+    <div class="boardlabel">CREATURE NEMICHE <span class="mini" style="font-family:VT323;text-transform:none">(del nemico)</span></div>
+    <div class="boardrow pixel-border" id="enemyBoard"></div>
+    <div class="boardlabel">LE TUE CREATURE <span class="mini" style="font-family:VT323;text-transform:none">(giocate dalla mano: da qui attaccano)</span></div>
+    <div class="boardrow pixel-border" id="yourBoard"></div>
+
+    <div class="hint" id="hint"></div>
+    <div class="controls">
+      <button id="attackBtn" class="btn-red">ATTACCA</button>
+      <button id="endBtn" class="btn-gold">FINE TURNO ▶</button>
+      <button id="confirmBlockBtn" class="btn-blue hidden">CONFERMA BLOCCHI</button>
+      <button id="endDayBtn" class="btn-blue">CHIUDI LA GIORNATA</button>
+    </div>
+
+    <div class="pomo pixel-border" id="pomoBox">
+      <div class="head" id="pomoLabel" style="font-size:9px;color:var(--blue)">SCRIVI IL TASK E SCEGLI LA DURATA PER INIZIARE IL TURNO</div>
+      <input id="taskText" class="tinp" placeholder="Su cosa lavori adesso?..." maxlength="60" style="max-width:420px;margin:6px auto 0;display:block">
+      <div class="clock head" id="clock" style="display:none">25:00</div>
+      <div class="controls" id="durRow">
+        <button class="durBtn btn-green" data-d="5">5 min · +1</button>
+        <button class="durBtn btn-green" data-d="10">10 min · +2</button>
+        <button class="durBtn btn-gold" data-d="15">15 min · +4</button>
+        <button class="durBtn btn-gold" data-d="25">25 min · +6</button>
+      </div>
+      <div class="controls hidden" id="runRow">
+        <button id="pPause" class="btn-blue">PAUSA</button>
+        <button id="pReset" class="btn-red">ANNULLA</button>
+      </div>
+    </div>
+
+    <div class="boardlabel">I TUOI APPUNTI <span class="mini" style="font-family:VT323;text-transform:none">(generati dai Pomodori: sono il tuo mana, si rinnovano ogni turno)</span></div>
+    <div class="appunti pixel-border" id="appunti"></div>
+
+    <div class="boardlabel">LA TUA MANO <span class="mini" style="font-family:VT323;text-transform:none">(clicca una carta per giocarla; costa Appunti)</span></div>
+    <div class="hand" id="hand"></div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <div id="overlay" class="hidden"></div>
+</div>
+
+<script src="cards.js"></script>
+<script src="duel-core.js"></script>
+<script src="card-render.js"></script>
+<script src="progression.js"></script>
+<script src="history.js"></script>
+<script src="duel-ui.js"></script>
+</body>
+</html>

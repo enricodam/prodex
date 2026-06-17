@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROD-EX: The Workday Standoff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0a18; --bg2:#13112a; --panel:#1b1838; --panel2:#241f4a;
+  --ink:#ece9ff; --dim:#9a93c8; --gold:#f4c95d; --blue:#4f8be8; --red:#e0566a;
+  --green:#5bc77f; --purple:#9b6ff0; --line:#3a3470; --shadow:#070612;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;max-width:100%;overflow-x:hidden}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:
+    radial-gradient(circle at 20% 0%, #1a1640 0%, transparent 55%),
+    radial-gradient(circle at 90% 100%, #2a1640 0%, transparent 50%),
+    var(--bg);
+  color:var(--ink); font-family:'VT323',ui-monospace,monospace;
+  font-size:20px; line-height:1.15; image-rendering:pixelated; overflow-x:hidden;
+}
+canvas{image-rendering:pixelated}
+.head{font-family:'Press Start 2P',monospace;letter-spacing:1px}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:999;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px);mix-blend-mode:multiply}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:998;box-shadow:inset 0 0 160px 30px rgba(0,0,0,.7)}
+.wrap{max-width:1180px;margin:0 auto;padding:14px}
+.pixel-border{border:3px solid #000;box-shadow:0 0 0 3px var(--line),0 6px 0 3px var(--shadow),inset 0 0 0 2px rgba(255,255,255,.06);background:var(--panel)}
+button{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--ink);background:var(--panel2);border:3px solid #000;
+  box-shadow:0 4px 0 #000,inset 0 0 0 2px rgba(255,255,255,.08);padding:9px 11px;cursor:pointer;letter-spacing:.5px;transition:transform .04s}
+button:hover{filter:brightness(1.18)}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #000,inset 0 0 0 2px rgba(255,255,255,.08)}
+button:disabled{opacity:.38;cursor:not-allowed;filter:grayscale(.6)}
+.btn-gold{background:#5a4410;color:var(--gold)}.btn-blue{background:#1c3360;color:#bcd6ff}
+.btn-red{background:#5a1822;color:#ffc2cc}.btn-green{background:#143d24;color:#bdfacf}
+.tinp{font-family:'VT323';font-size:19px;background:#0d0b20;color:var(--ink);border:3px solid #000;box-shadow:inset 0 0 0 2px var(--line);padding:8px 10px;width:100%}
+select.tinp,textarea.tinp{cursor:pointer}
+.mini{font-family:'VT323';font-size:17px;color:var(--dim)}
+.hidden{display:none!important}
+a{color:var(--blue)}
+
+/* title */
+#title{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  background:radial-gradient(circle at 50% 35%, #221a52 0%, #0b0a18 70%)}
+#title h1{font-size:clamp(22px,5vw,46px);margin:0;color:var(--gold);text-shadow:4px 4px 0 #000,0 0 26px rgba(244,201,93,.55);line-height:1.4}
+#title .sub{color:var(--blue);margin:18px 0 6px;font-size:clamp(10px,2.2vw,16px)}
+#title .by{color:var(--dim);font-size:20px;margin-top:6px}
+.blink{animation:bk 1.1s steps(2) infinite}@keyframes bk{50%{opacity:0}}
+
+/* hud */
+.topbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:10px 14px;margin-bottom:10px}
+.brand{font-size:14px;color:var(--gold);text-shadow:2px 2px 0 #000}
+.stats{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.stat{display:flex;align-items:center;gap:6px;font-family:'Press Start 2P';font-size:11px}
+.stat small{font-family:'VT323';font-size:18px;color:var(--dim)}
+.xpwrap{display:flex;flex-direction:column;gap:3px;min-width:150px}
+.xpbar{height:9px;background:#0d0b20;border:2px solid #000;box-shadow:inset 0 0 0 1px var(--line)}
+.xpfill{height:100%;background:linear-gradient(90deg,#9b6ff0,#4f8be8)}
+.heartbar{display:flex;gap:2px}
+.heart{width:13px;height:13px;background:var(--red);clip-path:polygon(50% 100%,0 35%,18% 12%,50% 30%,82% 12%,100% 35%)}
+.heart.off{background:#3a2030}
+
+/* stepper */
+.stepper{display:flex;gap:8px;align-items:center;justify-content:center;margin:4px 0 14px;flex-wrap:wrap}
+.step{font-family:'Press Start 2P';font-size:9px;padding:8px 10px;border:3px solid #000;box-shadow:0 3px 0 #000;background:#161232;color:var(--dim)}
+.step.on{background:#1c3360;color:#bcd6ff;box-shadow:0 3px 0 #000,0 0 0 3px var(--blue)}
+.step.done{background:#143d24;color:#bdfacf}
+.step .n{opacity:.7;margin-right:5px}
+.arrow{color:var(--line);font-size:14px}
+
+/* phases */
+.phase{display:none}.phase.on{display:block}
+.panel{padding:12px}
+.panel h2{font-family:'Press Start 2P';font-size:11px;margin:0 0 10px;color:var(--gold);border-bottom:2px dashed var(--line);padding-bottom:8px;letter-spacing:1px}
+.panel h2 .tag{float:right;color:var(--dim);font-size:9px}
+.center{text-align:center}
+
+/* plan */
+.planwrap{max-width:680px;margin:0 auto}
+.triallist{display:flex;flex-direction:column;gap:8px;margin:10px 0;min-height:40px}
+.trow{display:flex;align-items:center;gap:10px;padding:8px 10px;background:linear-gradient(#221d44,#15112e);border:3px solid #000;box-shadow:0 3px 0 #000}
+.trow .dot{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P';font-size:11px;border:3px solid #000}
+.d1{background:#143d24;color:#bdfacf}.d2{background:#5a4410;color:var(--gold)}.d3{background:#5a1822;color:#ffc2cc}
+.trow .txt{flex:1;font-family:'VT323';font-size:19px;color:#fff}
+.trow .del{font-size:8px;padding:5px 7px}
+
+/* focus dashboard */
+.cols3{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:12px;align-items:start}
+@media(max-width:900px){.cols3{grid-template-columns:1fr}}
+.enemies{display:flex;flex-direction:column;gap:8px;min-height:80px}
+.enemy{display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer;background:linear-gradient(#2a2150,#1a1436);position:relative}
+.enemy.sel{box-shadow:0 0 0 3px var(--gold),0 5px 0 3px var(--shadow)}
+.enemy.rec::after{content:"★";position:absolute;top:-8px;right:-6px;color:var(--gold);font-size:24px;text-shadow:1px 1px 0 #000}
+.enemy canvas{width:40px;height:40px;display:block;flex:none}
+.enemy .nm{flex:1;font-family:'VT323';font-size:18px;color:#fff;line-height:1.05}
+.hp{display:flex;gap:3px;margin-top:3px}
+.pip{width:11px;height:11px;background:var(--green);border:2px solid #000}.pip.gone{background:#26203f}
+.done-trial{display:flex;align-items:center;gap:8px;padding:5px 8px;font-family:'VT323';font-size:16px;color:var(--dim);text-decoration:line-through}
+.empty-note{color:var(--dim);font-family:'VT323';font-size:18px;padding:8px}
+.pomo{text-align:center}
+.clock{font-family:'Press Start 2P';font-size:38px;color:var(--ink);margin:6px 0 8px;text-shadow:3px 3px 0 #000}
+.mode{font-family:'Press Start 2P';font-size:10px;color:var(--blue);margin-bottom:6px}.mode.break{color:var(--green)}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0}
+.window{display:inline-block;padding:5px 9px;font-family:'Press Start 2P';font-size:9px;border:3px solid #000;box-shadow:0 3px 0 #000;margin-top:4px}
+.window.ok{background:#143d24;color:#9bf2b4}.window.no{background:#3a1822;color:#ffb0bc}
+.res{display:flex;flex-direction:column;gap:10px}
+.resbox{padding:8px 10px;background:#161232;border:3px solid #000;box-shadow:0 3px 0 #000}
+.resbox .lab{font-family:'VT323';font-size:16px;color:var(--dim)}
+.resbox .big{font-family:'Press Start 2P';font-size:18px;color:var(--gold)}
+.lands{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.land{width:84px;padding:6px;text-align:center;cursor:pointer;background:linear-gradient(#241f4a,#161232)}
+.land.tapped{opacity:.42;filter:grayscale(.7);cursor:default}
+.land canvas{width:34px;height:34px;display:block;margin:2px auto}
+.land .ln{font-family:'VT323';font-size:14px;color:#fff;line-height:1}
+.land .lp{font-family:'Press Start 2P';font-size:9px;color:var(--gold);margin-top:3px}
+.dists{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.dist{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#3a1430;border:3px solid #000;box-shadow:0 3px 0 #000;font-family:'VT323';font-size:16px;color:#ffb0d8}
+.dist b{color:#fff;font-family:'Press Start 2P';font-size:9px}.dist button{font-size:8px;padding:5px 6px;margin-left:auto}
+.hand{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.card{width:120px;padding:8px 7px;cursor:pointer;position:relative;text-align:left;background:linear-gradient(#221d44,#15112e);transition:transform .07s}
+.card:hover:not(.dis){transform:translateY(-5px)}.card.dis{opacity:.4;cursor:not-allowed}
+.card .cn{font-family:'Press Start 2P';font-size:8.5px;color:#fff;line-height:1.35;min-height:26px}
+.card .cost{position:absolute;top:-8px;right:-7px;width:26px;height:26px;border-radius:50%;background:var(--gold);border:3px solid #000;font-family:'Press Start 2P';font-size:10px;display:flex;align-items:center;justify-content:center;color:#3a2a06;box-shadow:0 2px 0 #000}
+.card canvas{width:38px;height:38px;display:block;margin:4px auto 6px}
+.card .ct{font-family:'VT323';font-size:14px;color:var(--dim);line-height:1.05;min-height:50px}
+.card.blue{box-shadow:0 0 0 3px #24407a,0 5px 0 3px var(--shadow)}.card.red{box-shadow:0 0 0 3px #6a2230,0 5px 0 3px var(--shadow)}
+.card.gold{box-shadow:0 0 0 3px #6a5012,0 5px 0 3px var(--shadow)}.card.green{box-shadow:0 0 0 3px #1f5a36,0 5px 0 3px var(--shadow)}
+.log{height:120px;overflow:auto;background:#070613;border:3px solid #000;box-shadow:inset 0 0 0 2px var(--line);padding:8px 10px;font-family:'VT323';font-size:16px}
+.log p{margin:0 0 2px;color:#a7e0b0}.log p.warn{color:#ffb0c0}.log p.sys{color:var(--gold)}
+
+/* review */
+.revwrap{max-width:720px;margin:0 auto}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:12px 0}
+.rcard{padding:10px;background:#161232;border:3px solid #000;box-shadow:0 3px 0 #000;text-align:center}
+.rcard .v{font-family:'Press Start 2P';font-size:18px;color:var(--gold)}.rcard .l{font-family:'VT323';font-size:15px;color:var(--dim)}
+.banner{font-family:'Press Start 2P';text-align:center;padding:14px;font-size:18px;margin:6px 0}
+.banner.win{background:#143d24;color:#bdfacf;border:3px solid #000;box-shadow:0 4px 0 #000}
+.banner.lose{background:#3a1822;color:#ffc2cc;border:3px solid #000;box-shadow:0 4px 0 #000}
+.medal{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;margin:3px;background:#5a4410;color:var(--gold);border:3px solid #000;box-shadow:0 3px 0 #000;font-family:'VT323';font-size:16px}
+
+/* history */
+.heat{display:flex;gap:4px;flex-wrap:wrap;margin:10px 0}
+.cell{width:18px;height:18px;border:2px solid #000}
+.h-win{background:var(--green)}.h-lose{background:#7a2230}.h-part{background:#5a4410}.h-none{background:#1a1638}
+.daylist{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:240px;overflow:auto}
+.dayrow{display:flex;gap:10px;align-items:center;padding:6px 8px;background:#161232;border:3px solid #000;box-shadow:0 2px 0 #000;font-family:'VT323';font-size:16px}
+.dayrow .b{font-family:'Press Start 2P';font-size:8px;padding:3px 6px}
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:70;background:#1c3360;color:#bcd6ff;border:3px solid #000;box-shadow:0 4px 0 #000;padding:8px 14px;font-family:'Press Start 2P';font-size:10px;display:none}
+.foot{margin-top:14px;color:var(--dim);font-family:'VT323';font-size:16px;text-align:center}
+
+/* mobile / iPhone */
+@media(max-width:600px){
+  body{font-size:19px}
+  .wrap{padding:8px}
+  .topbar{flex-direction:column;align-items:stretch;gap:8px;text-align:center}
+  .brand{font-size:12px}
+  .stats{justify-content:center;gap:10px;flex-wrap:wrap}
+  .xpwrap{min-width:0;width:100%;align-items:center}
+  .xpbar{width:80%}
+  .stepper{gap:5px}.step{font-size:8px;padding:7px 6px}.arrow{font-size:11px}
+  .panel{padding:10px}
+  .panel h2{font-size:10px}
+  .panel h2 .tag{float:none;display:block;margin-top:5px;font-size:8px}
+  .clock{font-size:34px}
+  .card{width:46%}
+  .card .cn{font-size:8px;min-height:22px}.card .ct{font-size:14px;min-height:44px}
+  .land{width:30%}
+  .enemy .nm{font-size:17px}
+  #title h1{font-size:34px}
+  textarea.tinp,input.tinp{font-size:16px}
+}
+@media(max-width:380px){
+  .card{width:100%}
+  .step{font-size:7px}
+}
+</style>
+</head>
+<body>
+
+<div id="title">
+  <h1 class="head">PROD-EX</h1>
+  <div class="sub head">THE WORKDAY STANDOFF</div>
+  <canvas id="titleArt" width="160" height="80" style="width:300px;height:150px;margin:18px 0"></canvas>
+  <button id="startBtn" class="btn-gold head blink" style="font-size:14px;padding:14px 20px">▶ MODALITA' CLASSICA</button>
+  <div style="margin-top:12px"><a href="duel.html" class="head" style="font-size:11px;color:var(--purple);text-decoration:none;border:3px solid #000;box-shadow:0 4px 0 #000;background:#3a2470;padding:11px 16px;display:inline-block">⚔ MODALITA' DUELLO (beta)</a></div>
+  <div class="by">Sei un planeswalker in viaggio. Ogni Prova e' una tappa della giornata.<br>Classica: traccia la giornata. Duello: sfida a carte alimentata dai Pomodori.</div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div id="game" class="wrap hidden">
+  <div class="topbar pixel-border">
+    <div class="brand head">PROD-EX</div>
+    <div class="stats">
+      <div class="xpwrap">
+        <div class="stat" style="font-size:9px"><span id="lvlTitle" style="color:var(--purple)">Apprendista</span></div>
+        <div class="xpbar"><div class="xpfill" id="xpFill" style="width:0%"></div></div>
+        <div class="mini" id="xpText" style="font-size:13px">Lv 1 · 0 XP</div>
+      </div>
+      <div class="stat"><canvas id="focusOrb" width="18" height="18" style="width:20px;height:20px"></canvas><span id="focusN" style="color:var(--gold)">0</span><small>Focus</small></div>
+      <div class="stat">♥<div class="heartbar" id="hearts"></div></div>
+      <div class="stat">🔥<span id="streakN">0</span><small>serie</small></div>
+      <button id="histBtn" class="btn-blue">STORICO</button>
+      <button id="sndBtn" title="audio">♪ ON</button>
+    </div>
+  </div>
+
+  <div class="stepper" id="stepper">
+    <div class="step" data-ph="plan"><span class="n">1</span>PIANIFICA</div>
+    <span class="arrow">▶</span>
+    <div class="step" data-ph="focus"><span class="n">2</span>CONCENTRATI</div>
+    <span class="arrow">▶</span>
+    <div class="step" data-ph="review"><span class="n">3</span>BILANCIO</div>
+  </div>
+
+  <!-- PHASE: PLAN -->
+  <div class="phase" id="phasePlan">
+    <div class="planwrap">
+      <div class="panel pixel-border">
+        <h2>PIANIFICA LA GIORNATA <span class="tag">le Prove del cammino</span></h2>
+        <input id="taskText" class="tinp" placeholder="Es. Revisione bozza articolo..." maxlength="80">
+        <div class="row" style="justify-content:space-between;margin-top:8px">
+          <span class="mini">Difficolta':</span>
+          <span>
+            <button class="tBtn btn-green" data-t="1">1 veloce</button>
+            <button class="tBtn btn-gold" data-t="2">2 media</button>
+            <button class="tBtn btn-red" data-t="3">3 tosta</button>
+          </span>
+        </div>
+        <div class="triallist" id="planList"></div>
+        <div class="center" style="margin-top:10px">
+          <button id="startDayBtn" class="btn-gold" disabled>INIZIA LA GIORNATA ▶</button>
+        </div>
+        <div class="mini center" style="margin-top:8px">Aggiungi le attivita' reali di oggi. Le affronterai una alla volta, ma potrai cambiare Prova quando vuoi.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE: FOCUS -->
+  <div class="phase" id="phaseFocus">
+    <div class="cols3">
+      <div class="panel pixel-border">
+        <h2>LE PROVE <span class="tag" id="progTag">0/0</span></h2>
+        <div class="enemies" id="enemies"></div>
+        <div id="doneList" style="margin-top:8px"></div>
+        <div style="margin-top:10px;border-top:2px dashed var(--line);padding-top:8px">
+          <input id="focusTaskText" class="tinp" placeholder="Aggiungi una Prova ora..." maxlength="80" style="font-size:16px">
+          <div class="row" style="gap:6px;margin-top:6px;justify-content:center">
+            <span class="mini" style="align-self:center">difficolta':</span>
+            <button class="ftBtn btn-green" data-t="1">+1</button>
+            <button class="ftBtn btn-gold" data-t="2">+2</button>
+            <button class="ftBtn btn-red" data-t="3">+3</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel pixel-border pomo">
+        <h2>CONCENTRATI</h2>
+        <div class="mode head" id="pmode">LAVORO</div>
+        <div class="mini" id="pTarget">Prova: nessuna</div>
+        <div class="clock head" id="clock">25:00</div>
+        <div class="row">
+          <button id="pStart" class="btn-green">START</button>
+          <button id="pPause" class="btn-blue" disabled>PAUSA</button>
+          <button id="pReset" class="btn-red">RESET</button>
+        </div>
+        <div class="row mini" style="gap:6px;align-items:center;justify-content:center">
+          lavoro <input id="workMin" class="tinp" style="width:50px" type="number" min="1" max="90" value="25">
+          pausa <input id="breakMin" class="tinp" style="width:50px" type="number" min="1" max="30" value="5">
+        </div>
+        <div id="windowTag"></div>
+      </div>
+      <div class="panel pixel-border">
+        <h2>RISORSE</h2>
+        <div class="res">
+          <div class="resbox"><span class="lab">Focus</span> <span class="big" id="focusN2">0</span>
+            <div class="lands" id="lands"></div></div>
+          <div class="resbox"><span class="lab">Distrazioni</span><div class="dists" id="dists"><span class="mini">Nessuna. Per ora.</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel pixel-border" style="margin-top:12px">
+      <h2>AZIONI <span class="tag">le carte di progresso si sbloccano dopo un Pomodoro</span></h2>
+      <div class="hand" id="hand"></div>
+    </div>
+    <div class="row" style="margin-top:10px;justify-content:space-between">
+      <button id="endDayBtn" class="btn-gold">CHIUDI LA GIORNATA ▶</button>
+      <div class="mini">Diario:</div>
+    </div>
+    <div class="panel pixel-border" style="margin-top:8px"><div class="log" id="log"></div></div>
+  </div>
+
+  <!-- PHASE: REVIEW -->
+  <div class="phase" id="phaseReview">
+    <div class="revwrap">
+      <div class="panel pixel-border">
+        <h2>BILANCIO DELLA GIORNATA</h2>
+        <div id="revBanner"></div>
+        <div class="rgrid" id="revStats"></div>
+        <div id="revXp" class="center" style="font-family:'Press Start 2P';font-size:11px;color:var(--purple);margin:6px 0"></div>
+        <div id="revMedals" class="center"></div>
+        <div class="mini" style="margin-top:10px">Note della giornata (opzionale):</div>
+        <textarea id="revNotes" class="tinp" rows="2" placeholder="Com'e' andata? Cosa ho imparato?"></textarea>
+        <div class="row" style="margin-top:12px;justify-content:center">
+          <button id="saveDayBtn" class="btn-green">SALVA NELLO STORICO ▶</button>
+          <button id="newDayBtn" class="btn-blue hidden">NUOVA GIORNATA</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE: HISTORY -->
+  <div class="phase" id="phaseHistory">
+    <div class="revwrap">
+      <div class="panel pixel-border">
+        <h2>STORICO <span class="tag" id="histTag"></span></h2>
+        <div class="mini">Ultimi giorni (verde vinta · rosso persa · oro parziale)</div>
+        <div class="heat" id="heat"></div>
+        <div class="rgrid" id="histStats"></div>
+        <div class="row" style="justify-content:center;flex-wrap:wrap">
+          <button id="expCsv" class="btn-green">EXPORT CSV</button>
+          <button id="expJson" class="btn-blue">EXPORT JSON</button>
+          <button id="impJson" class="btn-gold">IMPORT JSON</button>
+          <button id="resetHist" class="btn-red">AZZERA</button>
+          <input id="impFile" type="file" accept="application/json" class="hidden">
+        </div>
+        <div class="daylist" id="daylist"></div>
+        <div class="center" style="margin-top:10px"><button id="backBtn" class="btn-blue">◀ TORNA</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">PROD-EX e' un gioco-rituale: la carta e' un segnavia, non sostituisce il lavoro vero. I dati restano nel tuo browser.</div>
+</div>
+
+<script src="game-core.js"></script>
+<script src="progression.js"></script>
+<script src="history.js"></script>
+<script src="game-ui.js"></script>
+</body>
+</html>
