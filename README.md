@@ -1,79 +1,84 @@
-# PROD-EX: The Workday Standoff
+# PROD-EX v2.0
 
-Microgioco solitario di gamification della produttivita', in stile retrogaming 16-bit e con atmosfera fantasy alla Magic: The Gathering. Sei un planeswalker in viaggio: la tua giornata e' un'avventura e ogni attivita' reale e' una Prova lungo il cammino. Il lavoro vero supera la Prova, la carta e' solo il segnavia. Il vero avversario non e' la tua giornata, ma la Distrazione (l'entropia che ti rallenta).
+**Un gioco di carte fantasy in pixel art, alimentato dalla produttività reale.**
 
-Tutto originale: frame, sprite pixel-art, simboli e nomi sono disegnati da zero, nessun asset o marchio di terzi.
+Il tuo lavoro vero (minuti di concentrazione) diventa *essenza*. Con l'essenza **forgi carte** sempre più potenti, **costruisci un mazzo** e **scali La Torre** in battaglie a turni stile Hearthstone. Più lavori, più forte diventa il mazzo, più in alto sali.
 
-## Come si gioca (tre fasi guidate)
+> Il deck-building **è** la produttività: il gioco vero (le battaglie) è il banco di prova di quanto hai costruito, giorno dopo giorno.
 
-Il gioco ti accompagna passo-passo: c'e' sempre una sola azione evidente da fare.
+## Come giocare
 
-1. **Pianifica.** Apri la giornata e inserisci le Prove (le attivita' reali) con la loro difficolta' 1-3. Poi premi "Inizia la giornata".
-2. **Concentrati.** Il gioco mette una Prova in evidenza col Pomodoro al centro (puoi comunque saltare a un'altra Prova quando vuoi). Fai il lavoro vero: solo a Pomodoro finito si sblocca l'avanzamento. Tappi le Focus Lands per generare Focus e giochi le carte di progresso (Pomodoro Strike +1, Flow State +3) sulla Prova. Le Distrazioni arrivano con un timer: se le ignori esplodono e ti tolgono Vigore o complicano una Prova; le gestisci con Focus, Time Block o Recovery.
-3. **Bilancio.** Chiudi la giornata: riepilogo (Prove superate, pomodori, minuti di focus, distrazioni, esito), XP guadagnati e medaglie sbloccate, campo note. Salvi tutto nello storico.
+È una web app a pagina singola, senza build e senza server.
 
-Vinci completando il cammino prima che il Vigore arrivi a zero. La regola psicologica chiave: le carte di progresso si giocano SOLO dopo un Pomodoro reale. Il gioco non simula il lavoro, lo premia.
+- **Online**: apri la pagina pubblicata con GitHub Pages.
+- **In locale**: apri `index.html` in un browser (oppure servi la cartella, es. `python3 -m http.server` e vai su `http://localhost:8000`).
 
-## Progressione e storico
+I progressi si salvano automaticamente nel browser (`localStorage`). Dal pulsante **SALVA** ottieni un codice testuale per esportare/importare la partita su un altro dispositivo.
 
-- **Progressione:** guadagni XP per ogni Pomodoro, Prova superata e giornata vinta; sali di livello (da Apprendista a Maestro del Tempo) e sblocchi medaglie (Prima luce, Maratoneta, Zen, Stratega e altre).
-- **Storico:** ogni giornata si salva in locale e diventa una riga di storico, con heatmap della serie e metriche cumulate.
-- **Export/Import:** esporti in **CSV** (per analizzare la tua produttivita' in R o Excel) e in **JSON** (backup completo); l'import JSON sposta i dati tra dispositivi, dato che il salvataggio del browser e' per-dispositivo.
-
-## Le carte
-
-**Focus Lands** (mana, si stappano a ogni nuovo blocco): Deep Work (+3), Quick Win (+1), Caffeine Rush (+2, una volta al giorno).
-
-**Azioni** (costano Focus): Pomodoro Strike (1), Flow State (3), Time Block (2, protegge un task), Delegate (2, rimuove un task), Eisenhower Filter (1, suggerisce il bersaglio), Recovery (1, stappa una land o annulla una distrazione).
-
-## Avvio
-
-**In locale:** apri `index.html` con un doppio click in qualsiasi browser (Windows, macOS, Linux). Nessuna installazione. I task, le vittorie e le impostazioni si salvano nel browser (localStorage). Online (Google Fonts) il look pixel e' perfetto; offline degrada a un font monospace.
-
-**Online (GitHub Pages):**
-
-1. Crea un repo su GitHub e carica questi file.
-2. Settings > Pages > Branch `main`, cartella `/root`, salva.
-3. In un minuto il gioco e' su `https://TUO-UTENTE.github.io/NOME-REPO/`, giocabile da qualsiasi dispositivo.
-
-## Sviluppo e test
-
-La logica di gioco e' separata dalla UI per essere testabile.
+## Il ciclo di gioco
 
 ```
-npm install      # installa jsdom (solo per i test)
-npm test         # core + progressione + storico + integrazione + smoke DOM
+lavoro reale → essenza → forgi carte → costruisci il mazzo → combatti nella Torre → sali di piano
 ```
 
-- `game-core.js` motore di regole della partita, senza DOM (gira anche in Node)
-- `progression.js` XP, livelli, titoli, medaglie (puro, testabile)
-- `history.js` persistenza giornate, aggregati, export CSV/JSON, import (puro)
-- `game-ui.js` rendering pixel-art, tre fasi, Pomodoro, audio, storico
-- `index.html` markup e stile
-- `test/` test-core (28), test-meta (35), test-integration (16), smoke-dom (19)
+### 🔥 Il Crogiolo (produttività)
+L'unica stanza che tocca il mondo reale. Accumuli minuti di focus in tre modi:
+- **Forgia** — blocco a durata scelta (1–60 min)
+- **Brace** — cronometro libero
+- **Offerta** — importi minuti tracciati altrove
 
-## Struttura
+Ogni minuto = 1 essenza. Puoi **categorizzare** il tempo (categorie personalizzabili) e gestire una **lista di task** con i minuti necessari, che si barrano man mano che li completi. Opzionale: ticchettio del timer.
+
+### 📜 Il Grimorio (collezione + mazzo)
+- **Collezione** — forgi carte a **rarità crescente** (Comune → Rara → Epica → Leggendaria): più essenza investi, più potenti le carte.
+- **Mazzo** — selezioni le carte (max 2 copie, 1 se Leggendaria) con cui combatti. La **potenza del mazzo** determina quanti piani della Torre puoi affrontare.
+
+### 🗼 La Torre (battaglia)
+Battaglia a turni stile Hearthstone, tutta a tap:
+- mana crescente, creature con attacco/vita, magie
+- parole chiave: **Impeto** (attacca subito), **Provocazione** (va colpita per prima), inneschi
+- stati chiari delle creature (pronta / attendi / stanca), numeri di danno animati, frantumazione alla morte
+- vinci → ricompensa in essenza e piano sbloccato; perdi → torni più forte
+
+### 📊 Il Diario
+Statistiche di produttività: minuti oggi/totali, giorni di fila, grafico degli ultimi 14 giorni e ripartizione del tempo per categoria.
+
+## La pipeline delle carte
+
+Le illustrazioni sono **pixel art generata** (su un foglio con sfondo magenta) e poi convertite in **dati-pixel nel codice** (palette + griglia di indici): nessuna immagine importata a runtime.
 
 ```
-prodex-game/
-  index.html
-  game-core.js
-  progression.js
-  history.js
-  game-ui.js
-  test/
-    test-core.js
-    test-meta.js
-    test-integration.js
-    smoke-dom.js
-  package.json
-  README.md
-  LICENSE
-  DESIGN_v2.md
+sources/carte_sheet*.png  →  build_cards.py  →  cards_data.js + cards_art.json + gallery HTML
+cards_art.json            →  export_pngs.py  →  cards_png/ + foglio A4 stampabile (PNG/PDF)
 ```
+
+Per rigenerare (serve Python con Pillow + numpy):
+
+```bash
+pip install Pillow numpy
+python3 build_cards.py    # rigenera i dati delle carte e la galleria
+python3 export_pngs.py    # esporta i PNG singoli e il foglio A4
+```
+
+Per **espandere il set**: aggiungi un nuovo foglio in `sources/`, registra le carte in `META`/`RAR` dentro `build_cards.py`, e rilancia gli script.
+
+## Struttura dei file
+
+| File / cartella | Cosa contiene |
+|---|---|
+| `index.html` | il gioco (web app, identico a `PROD-EX_app_prototype.html`) |
+| `cards_data.js` | dati delle carte (palette + pixel) usati dal gioco |
+| `PROD-EX_carte_v2_gallery.html` | galleria di tutte le carte |
+| `build_cards.py` | converte i fogli sorgente in dati-pixel |
+| `export_pngs.py` | esporta carte PNG e foglio A4 stampabile |
+| `sources/` | i fogli di sprite generati (sorgente delle carte) |
+| `fonts/` | font pixel (Pixelify Sans, Press Start 2P) per l'export PNG |
+| `cards_png/`, `PROD-EX_carte_v2_A4.*` | carte stampabili generate |
+
+## Tecnologia
+
+HTML/CSS/JavaScript vanilla, nessuna dipendenza a runtime, nessun build step. Audio retro generato con la Web Audio API. Salvataggio in `localStorage`. I font del gioco arrivano da Google Fonts via CDN.
 
 ## Licenza
 
-MIT (vedi LICENSE). Sprite, regole e codice sono originali.
-
-Enrico D'Ambrosio · progetto personale (hobby). Contatti: [aggiungi qui email o handle GitHub]
+[MIT](LICENSE) © 2026 Enrico D'Ambrosio. I font sono di proprietà dei rispettivi autori (Open Font License).
