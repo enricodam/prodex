@@ -57,6 +57,13 @@ body{background:#07060f;font-family:'Pixelify Sans',sans-serif;color:#cdbef0;dis
 .subtabs{display:flex;gap:6px}
 .subtab{flex:1;text-align:center;padding:8px 0;border-radius:7px;border:2px solid #000;background:var(--ind2);color:var(--mut);font-size:13px;font-weight:600;cursor:pointer}
 .subtab.on{background:#3a3470;color:var(--cream);border-color:#7f77dd}
+.info-btn{cursor:pointer;color:#7fb0e0;font-size:13px;border:2px solid #000;background:var(--ind2);border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;margin-left:8px;vertical-align:middle}
+.forgehead{font-size:13px;color:var(--mut);margin-bottom:8px;line-height:1.5}
+.forgehead b{color:var(--lava)}
+.forge .sub{font-size:10px;color:var(--mut);font-weight:400}
+.cilegend{display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--cream);line-height:1.4}
+.cilegend .cidot{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid #000;margin-right:7px}
+#ci-card .card{width:184px}
 .deckhead{font-size:14px;color:var(--cream);font-weight:600}
 .deckhead b{color:var(--lava);font-weight:700}
 .deckrow{display:flex;align-items:center;gap:8px;background:var(--ind2);border:2px solid #000;border-radius:7px;padding:7px 9px;margin-bottom:6px}
@@ -202,6 +209,15 @@ textarea.code{width:100%;height:90px;background:var(--blk);border:2px solid #000
 .bbanner.show{animation:bban 1.15s ease-out forwards}
 @keyframes bban{0%{opacity:0;transform:scale(.5)}18%{opacity:1;transform:scale(1.05)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.15)}}
 .bhelp{font-family:'Press Start 2P';font-size:11px;color:#8a83b8;border:2px solid #000;background:#1a1838;border-radius:6px;padding:4px 8px;cursor:pointer}
+.bhero.foe{cursor:crosshair;gap:10px}
+.foeport{width:42px;height:42px;border:2px solid #000;border-radius:6px;background:#3a1f2a;color:#e24b4a;display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 auto}
+.finfo{flex:1;display:flex;flex-direction:column;gap:3px}
+.bc.atking .bcf{outline:3px solid #e8743b;box-shadow:0 0 11px #e8743b}
+.bc.atking-foe .bcf{outline:3px solid #e24b4a;box-shadow:0 0 11px #e24b4a}
+.bc.blocked .bcf{outline:3px solid #5ad17a}
+.bc.blocking .bcf{outline:3px solid #5ad17a;box-shadow:0 0 10px #5ad17a}
+.bc.canpick .bcf{outline:2px dashed #7fb0e0}
+.bstatus.a{color:#e8743b}
 .bcf{background:#a3343f;border:3px solid;border-color:#cf6671 #5e1b22 #5e1b22 #cf6671;border-radius:5px;padding:3px;display:flex;flex-direction:column;gap:2px;position:relative}
 .bch{display:flex;align-items:center;gap:3px}
 .bcc{width:17px;height:17px;border-radius:50%;border:2px solid #000;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P';font-size:7px;color:#1a1005;flex:0 0 auto}
@@ -255,7 +271,7 @@ textarea.code{width:100%;height:90px;background:var(--blk);border:2px solid #000
     </div>
     <!-- GRIMORIO -->
     <div class="scr" id="s-grimorio">
-      <div class="htitle">Grimorio <span class="sm" id="collcount">0/18</span></div>
+      <div class="htitle"><span>Grimorio <span class="info-btn" id="b-cardinfo">i</span></span> <span class="sm" id="collcount">0/18</span></div>
       <div class="subtabs">
         <div class="subtab on" data-gv="mazzo">Mazzo</div>
         <div class="subtab" data-gv="collezione">Collezione</div>
@@ -266,8 +282,9 @@ textarea.code{width:100%;height:90px;background:var(--blk);border:2px solid #000
         <div id="decklist"></div>
       </div>
       <div id="gv-collezione" style="display:none">
+        <div class="forgehead">Hai <b id="forge-ess">0</b> essenza. <b>Forgia</b> = spendi essenza per ottenere <b>1 carta casuale</b> della rarità scelta. Più alta la rarità, più potente la carta (e più costa).</div>
         <div id="forges"></div>
-        <div class="hint" style="text-align:left;margin-bottom:6px">Tocca una carta posseduta per aggiungerla al mazzo (max 2 copie, 1 se Leggendaria).</div>
+        <div class="hint" style="text-align:left;margin-bottom:6px">Tocca una carta <b>posseduta</b> per aggiungerla al mazzo (max 2 copie, 1 se Leggendaria). Il numero in alto a destra è quante copie possiedi.</div>
         <div class="grid" id="collgrid"></div>
       </div>
     </div>
@@ -328,6 +345,19 @@ textarea.code{width:100%;height:90px;background:var(--blk);border:2px solid #000
     <div class="cated-row"><input id="newcat" placeholder="nuova categoria..." maxlength="18"><div class="btn go" id="b-catadd" style="padding:9px 14px">Aggiungi</div></div>
     <div class="btnrow" style="margin-top:12px"><div class="btn" id="b-catclose">Chiudi</div></div>
   </div></div>
+  <!-- infografica carta -->
+  <div class="ov" id="cardinfo"><div class="panel">
+    <h2>Come leggere una carta</h2>
+    <div id="ci-card" style="display:flex;justify-content:center;margin:10px 0"></div>
+    <div class="cilegend">
+      <div><span class="cidot" style="background:#4a90e2"></span><b>Costo</b> (cerchio in alto a sinistra): il <b>mana</b> che spendi per giocarla in battaglia.</div>
+      <div><span class="cidot" style="background:#e8743b"></span><b>Attacco</b> (gemma arancione in basso a sinistra): i danni che infligge.</div>
+      <div><span class="cidot" style="background:#b3322f"></span><b>Vita</b> (gemma rossa in basso a destra): quanti danni regge prima di essere distrutta.</div>
+      <div><span class="cidot" style="background:#a06fd6"></span><b>Tipo e rarità</b> (riga centrale): se è Creatura o Magia, e quanto è rara/potente.</div>
+      <div>Le <b>Magie</b> non hanno attacco/vita: hanno un effetto immediato (il testo della carta).</div>
+    </div>
+    <div class="btn" id="ci-close" style="margin-top:12px">Ho capito</div>
+  </div></div>
   <!-- pre-battaglia -->
   <div class="ov" id="prebattle"><div class="panel">
     <h2 id="pb-title">La Torre</h2>
@@ -345,18 +375,18 @@ textarea.code{width:100%;height:90px;background:var(--blk);border:2px solid #000
       <div class="bboard" id="b-myboard"></div>
     </div>
     <div class="binstr" id="b-instr"></div>
-    <div class="bbar"><span class="pv me" id="b-myhp">20</span><span class="mn" id="b-mymana">1/1</span><span class="bhelp" id="b-help">?</span><span class="endt" id="b-endturn">Fine turno</span></div>
+    <div class="bbar"><span class="pv me" id="b-myhp">20</span><span class="mn" id="b-mymana">1/1</span><span class="bhelp" id="b-help">?</span><span class="endt" id="b-action" style="display:none"></span><span class="endt" id="b-endturn">Fine turno</span></div>
     <div class="bhand" id="b-hand"></div>
   </div>
   <div class="bbanner" id="b-banner"></div>
   <div class="bmsg" id="b-msg" style="display:none"></div>
   <div class="ov" id="btut"><div class="panel">
     <h2>Come si combatte</h2>
-    <div class="rule"><span class="e">1</span><span>Tocca una <b>carta</b> in basso per giocarla. Costa <b>mana</b> (i cristalli blu), che cresce di 1 ogni turno.</span></div>
-    <div class="rule"><span class="e">2</span><span>Le <b>creature</b> entrano in campo ma non attaccano il turno in cui le giochi — tranne quelle con <b>Impeto</b>.</span></div>
-    <div class="rule"><span class="e">3</span><span>Per attaccare: tocca una tua creatura <b>pronta</b> (bordo verde), poi tocca il <b>bersaglio</b> — una creatura nemica o l'avversario in alto.</span></div>
-    <div class="rule"><span class="e">4</span><span><b>Provocazione</b> (bordo dorato): vanno colpite per prime.</span></div>
-    <div class="rule"><span class="e">★</span><span>Porta i <b>PV</b> dell'avversario (il cuore in alto) a <b>0</b> per conquistare il piano.</span></div>
+    <div class="rule"><span class="e">1</span><span>Nel tuo turno giochi le <b>carte</b> dalla mano: costano <b>mana</b> (i diamanti blu), che cresce di 1 ogni turno.</span></div>
+    <div class="rule"><span class="e">2</span><span>Le <b>creature</b> non possono attaccare il turno in cui le giochi — tranne quelle con <b>Rapidità</b>.</span></div>
+    <div class="rule"><span class="e">3</span><span><b>Attacco</b>: tocca le tue creature pronte (le selezioni), poi premi <b>«Attacca»</b>. L'avversario può <b>bloccare</b>; i danni non bloccati colpiscono i suoi PV.</span></div>
+    <div class="rule"><span class="e">4</span><span><b>Difesa</b>: quando l'avversario attacca, tocca una tua creatura e poi l'attaccante per <b>bloccarlo</b>. Una creatura che ha attaccato è <b>impegnata</b> e non può difendere.</span></div>
+    <div class="rule"><span class="e">★</span><span>Ogni creatura ha <b>Attacco</b> (gemma arancione) e <b>Vita</b> (gemma rossa). Porta i <b>PV</b> dell'avversario a <b>0</b> per vincere.</span></div>
     <div class="btn go" id="b-tutok" style="margin-top:12px">Combatti!</div>
   </div></div>
   <div id="toast"></div>
@@ -402,6 +432,8 @@ function openCatEd(){renderCatList();document.getElementById('cated').classList.
 function renderCatList(){var l=document.getElementById('catlist');l.innerHTML='';S.cats.forEach(function(ct,i){var row=document.createElement('div');row.className='cated-row';var inp=document.createElement('input');inp.value=ct.n;inp.oninput=function(){ct.n=inp.value;save();};var del=document.createElement('div');del.className='del';del.textContent='✕';del.onclick=function(){if(S.cats.length<=1){toast('Tieni almeno una categoria');return;}var rem=S.cats.splice(i,1)[0];if(S.catSel===rem.k)S.catSel=S.cats[0].k;save();renderCatList();renderCats();renderDiario();sfx('click');};row.appendChild(inp);row.appendChild(del);l.appendChild(row);});}
 document.getElementById('b-catadd').onclick=function(){var el=document.getElementById('newcat');var v=el.value.trim();if(!v)return;S.cats.push({k:'c'+(S.catSeq++),n:v});el.value='';save();renderCatList();renderCats();renderDiario();sfx('click');};
 document.getElementById('b-catclose').onclick=function(){document.getElementById('cated').classList.remove('on');renderCats();renderDiario();sfx('click');};
+document.getElementById('b-cardinfo').onclick=function(){var w=document.getElementById('ci-card');w.innerHTML='';w.appendChild(cardEl(CARDS[0]));document.getElementById('cardinfo').classList.add('on');sfx('click');};
+document.getElementById('ci-close').onclick=function(){document.getElementById('cardinfo').classList.remove('on');sfx('click');};
 /* ---- task della sessione ---- */
 function renderTasks(){var l=document.getElementById('tasklist');if(!l)return;l.innerHTML='';if(!S.tasks.length){l.innerHTML='<div class="hint" style="text-align:center;margin:0">Nessun task. Aggiungine uno qui sotto.</div>';return;}S.tasks.forEach(function(t){var row=document.createElement('div');row.className='task'+(t.done?' done':'')+(S.taskSel===t.id?' sel':'');row.innerHTML='<div class="chk">'+(t.done?'✓':'')+'</div><div class="tt">'+t.text+'</div><div class="tp">'+Math.min(t.prog,t.min)+'/'+t.min+'</div>';var rm=document.createElement('div');rm.className='trm';rm.textContent='✕';rm.onclick=function(e){e.stopPropagation();S.tasks=S.tasks.filter(function(x){return x.id!==t.id;});if(S.taskSel===t.id)S.taskSel=null;save();renderTasks();sfx('click');};row.appendChild(rm);row.onclick=function(){if(t.done)return;S.taskSel=(S.taskSel===t.id?null:t.id);save();renderTasks();sfx('click');};l.appendChild(row);});}
 document.getElementById('task-add').onclick=function(){var tx=document.getElementById('task-tx'),mn=document.getElementById('task-min');var t=tx.value.trim(),m=parseInt(mn.value||'0',10);if(!t||m<=0){toast('Scrivi un task e i minuti');return;}S.tasks.push({id:'t'+(S.taskSeq++),text:t,min:m,prog:0,done:false});if(!S.taskSel)S.taskSel=S.tasks[S.tasks.length-1].id;tx.value='';mn.value='';save();renderTasks();sfx('click');};
@@ -445,7 +477,7 @@ document.querySelectorAll('.tab').forEach(function(tb){tb.onclick=function(){mod
 /* ---- grimorio: forgia a tier ---- */
 function ownedCount(){return Object.keys(S.coll).filter(function(k){return S.coll[k]>0}).length;}
 function collPower(){var p=0;Object.keys(S.coll).forEach(function(k){if(S.coll[k]>0)p+=TIERPOW[CARDS[k].tier]||1;});return p;}
-function refreshForges(){var c=document.getElementById('forges');if(!c)return;c.innerHTML='';FORGES.forEach(function(f){var b=document.createElement('div');b.className='forge'+(S.ess<f.c?' dis':'');b.style.background=RARD[f.r];b.style.borderColor=RARC[f.r];b.innerHTML='<span><span class="rdot" style="background:'+RARC[f.r]+'"></span>'+f.n+' · <span style="color:'+RARC[f.r]+'">'+f.r+'</span></span><span class="c" style="color:var(--lava)">'+f.c+'</span>';b.onclick=function(){forge(f);};c.appendChild(b);});}
+function refreshForges(){var fe=document.getElementById('forge-ess');if(fe)fe.textContent=S.ess;var c=document.getElementById('forges');if(!c)return;c.innerHTML='';FORGES.forEach(function(f){var b=document.createElement('div');b.className='forge'+(S.ess<f.c?' dis':'');b.style.background=RARD[f.r];b.style.borderColor=RARC[f.r];b.innerHTML='<span><span class="rdot" style="background:'+RARC[f.r]+'"></span>'+f.n+' · <span style="color:'+RARC[f.r]+'">'+f.r+'</span><br><span class="sub">→ 1 carta casuale '+f.r+'</span></span><span class="c" style="color:var(--lava)">'+f.c+'</span>';b.onclick=function(){forge(f);};c.appendChild(b);});}
 function forge(f){if(S.ess<f.c){sfx('err');toast('Essenza insufficiente — lavora ancora');return;}var pool=[];CARDS.forEach(function(c,i){if(c.tier===f.t)pool.push(i);});if(!pool.length)return;setEss(S.ess-f.c);var i=pool[Math.floor(Math.random()*pool.length)];S.coll[i]=(S.coll[i]||0)+1;save();renderColl();var rv=document.getElementById('rv');rv.innerHTML='';rv.appendChild(cardEl(CARDS[i]));document.getElementById('ov').classList.add('on');sfx('forge');}
 function maxCopies(i){return CARDS[i].tier===4?1:2;}
 function owned(i){return S.coll[i]||0;}
@@ -453,7 +485,7 @@ function deckCount(){var n=0;Object.keys(S.deck).forEach(function(k){n+=S.deck[k
 function deckPower(){var p=0;Object.keys(S.deck).forEach(function(k){p+=S.deck[k]*(TIERPOW[CARDS[k].tier]||1);});return p;}
 function addToDeck(i){if(deckCount()>=30){sfx('err');toast('Mazzo pieno (max 30)');return;}if((S.deck[i]||0)>=maxCopies(i)){sfx('err');toast('Max '+maxCopies(i)+' copie di questa carta');return;}if((S.deck[i]||0)>=owned(i)){sfx('err');toast('Non possiedi altre copie — forgiane');return;}S.deck[i]=(S.deck[i]||0)+1;save();sfx('click');renderDeck();renderColl();renderTorre();}
 function remFromDeck(i){if(!S.deck[i])return;S.deck[i]--;if(S.deck[i]<=0)delete S.deck[i];save();sfx('click');renderDeck();renderColl();renderTorre();}
-function renderColl(){var cc=document.getElementById('collcount');if(cc)cc.textContent=ownedCount()+'/'+CARDS.length;var g=document.getElementById('collgrid');if(!g)return;g.innerHTML='';CARDS.forEach(function(c,i){var ow=owned(i)>0;var el=cardEl(c,!ow);el.style.position='relative';if(ow&&S.coll[i]>1){var q=document.createElement('div');q.className='qty';q.textContent='x'+S.coll[i];el.appendChild(q);}if(S.deck[i]>0){var db=document.createElement('div');db.className='dbadge';db.textContent=S.deck[i];el.appendChild(db);}el.onclick=function(){if(!ow){sfx('err');toast('Non possiedi questa carta');return;}addToDeck(i);};g.appendChild(el);});refreshForges();}
+function renderColl(){var cc=document.getElementById('collcount');if(cc)cc.textContent=ownedCount()+'/'+CARDS.length;var g=document.getElementById('collgrid');if(!g)return;g.innerHTML='';CARDS.forEach(function(c,i){var ow=owned(i)>0;var el=cardEl(c,!ow);el.style.position='relative';if(ow){var q=document.createElement('div');q.className='qty';q.textContent='×'+S.coll[i];el.appendChild(q);}if(S.deck[i]>0){var db=document.createElement('div');db.className='dbadge';db.textContent=S.deck[i];el.appendChild(db);}el.onclick=function(){if(!ow){sfx('err');toast('Non possiedi questa carta');return;}addToDeck(i);};g.appendChild(el);});refreshForges();}
 function renderDeck(){var dc=document.getElementById('deckcount');if(dc)dc.textContent=deckCount()+'/30';var dp=document.getElementById('deckpow');if(dp)dp.textContent='potenza '+deckPower();var l=document.getElementById('decklist');if(!l)return;l.innerHTML='';var idxs=Object.keys(S.deck).filter(function(k){return S.deck[k]>0;}).sort(function(a,b){return CARDS[a].cost-CARDS[b].cost;});if(!idxs.length){l.innerHTML='<div class="empty">Mazzo vuoto.<br>Apri la <b>Collezione</b> e tocca le carte per aggiungerle.</div>';return;}idxs.forEach(function(k){var c=CARDS[k],fc=FACT[c.f];var row=document.createElement('div');row.className='deckrow';row.innerHTML='<div class="cc" style="background:'+fc.gem+'">'+c.cost+'</div><div class="dn">'+c.n+' <span style="color:'+RARC[c.rarity]+';font-size:11px">'+c.rarity+'</span></div><div class="ct">×'+S.deck[k]+'</div>';var rm=document.createElement('div');rm.className='rm';rm.textContent='–';rm.onclick=function(){remFromDeck(k);};row.appendChild(rm);l.appendChild(row);});}
 document.querySelectorAll('.subtab').forEach(function(t){t.onclick=function(){var v=t.dataset.gv;document.querySelectorAll('.subtab').forEach(function(x){x.classList.toggle('on',x===t);});document.getElementById('gv-mazzo').style.display=v==='mazzo'?'block':'none';document.getElementById('gv-collezione').style.display=v==='collezione'?'block':'none';sfx('click');if(v==='mazzo')renderDeck();else renderColl();};});
 document.getElementById('b-ovclose').onclick=function(){document.getElementById('ov').classList.remove('on');};
@@ -489,13 +521,13 @@ document.getElementById('b-load').onclick=function(){var v=document.getElementBy
 /* ---- battaglia (Hearthstone-like ridotto) ---- */
 var BATTLE={
  'Drago Anziano':{t:'cre',atk:6,hp:7},
- 'Goblin esploratore':{t:'cre',atk:2,hp:1,charge:true},
- 'Sentinella di pietra':{t:'cre',atk:0,hp:5,taunt:true},
- 'Cavaliere d’acciaio':{t:'cre',atk:3,hp:4,taunt:true},
- 'Elementale di fuoco':{t:'cre',atk:5,hp:4,cry:2},
- 'Arciere elfico':{t:'cre',atk:3,hp:2,cry:1},
+ 'Goblin esploratore':{t:'cre',atk:2,hp:1,haste:true},
+ 'Sentinella di pietra':{t:'cre',atk:0,hp:5},
+ 'Cavaliere d’acciaio':{t:'cre',atk:3,hp:4},
+ 'Elementale di fuoco':{t:'cre',atk:5,hp:4},
+ 'Arciere elfico':{t:'cre',atk:3,hp:2},
  'Troll delle caverne':{t:'cre',atk:6,hp:5},
- 'Spettro':{t:'cre',atk:4,hp:2},
+ 'Spettro':{t:'cre',atk:4,hp:2,haste:true},
  'Apprendista mago':{t:'cre',atk:2,hp:3},
  'Dardo infuocato':{t:'sp',need:'foeAny',dmg:4},
  'Folgore arcana':{t:'sp',need:'foeAny',dmg:5},
@@ -518,14 +550,25 @@ function showBanner(t,color){var b=document.getElementById('b-banner');b.textCon
 var HEART='<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:-2px"><path d="M12 21s-7-4.6-9.3-9C1 8.5 2.5 5 6 5c2 0 3.2 1.2 4 2.4C10.8 6.2 12 5 14 5c3.5 0 5 3.5 3.3 7-2.3 4.4-9.3 9-9.3 9Z"/></svg>';
 function heart(hp,me){return '<span class="heart'+(me?' me':'')+'">'+HEART+' '+Math.max(0,hp)+'</span>';}
 function crystals(cur,max){var s='';for(var i=0;i<max;i++)s+='<span class="cry'+(i<cur?'':' e')+'"></span>';return '<span class="crys">'+s+'</span>';}
-function startBattle(lvl){B={floor:lvl,turnSide:'you',over:false,pending:null,busy:false,you:{hp:20,mana:0,maxMana:0,deck:buildBattleDeck(),hand:[],board:[]},foe:{hp:20+lvl*2,mana:0,maxMana:0,turn:0,board:[],hand:3}};setEss(S.ess-20);for(var i=0;i<3;i++)drawCard('you');document.getElementById('battle').classList.add('on');startYourTurn();if(!S.tut)document.getElementById('btut').classList.add('on');}
-function startYourTurn(){if(B.over)return;B.turnSide='you';B.you.maxMana=Math.min(10,B.you.maxMana+1);B.you.mana=B.you.maxMana;B.you.board.forEach(function(c){c.sick=false;c.canAttack=true;});drawCard('you');setTurnMsg('IL TUO TURNO');showBanner('IL TUO TURNO','#5ad17a');B.pending=null;renderBattle();}
-function endTurn(){if(B.over||B.turnSide!=='you')return;B.pending=null;foeTurn();}
-function foeTurn(){B.turnSide='foe';B.foe.turn++;B.foe.maxMana=Math.min(10,B.foe.turn);B.foe.mana=B.foe.maxMana;B.foe.hand=Math.min(6,(B.foe.hand||0)+1);B.foe.board.forEach(function(c){c.sick=false;c.canAttack=true;});setTurnMsg('TURNO AVVERSARIO');showBanner('TURNO AVVERSARIO','#e24b4a');renderBattle();var guard=0;while(B.foe.mana>=2&&B.foe.board.length<7&&B.foe.hand>0&&guard++<12){var cost=Math.min(B.foe.mana,2+Math.floor(Math.random()*3));var st=cost+Math.floor(B.floor/2);var taunt=Math.random()<0.28;B.foe.board.push({uid:nuid(),name:taunt?'Guardia':'Sgherro',cost:cost,atk:taunt?Math.max(1,st-1):st,hp:taunt?st+1:st,maxhp:taunt?st+1:st,taunt:taunt,sick:true,canAttack:false});B.foe.mana-=cost;B.foe.hand=Math.max(0,B.foe.hand-1);}renderBattle();setTimeout(foeAttacks,650);}
-function foeAttacks(){if(B.over)return;B.foe.board.forEach(function(c){if(B.over||c.sick||!c.canAttack)return;var taunts=B.you.board.filter(function(x){return x.taunt;});if(taunts.length){var t=taunts[0];floatAt(elFor('you',t.uid),'-'+c.atk);floatAt(elFor('foe',c.uid),'-'+t.atk);t.hp-=c.atk;c.hp-=t.atk;if(t.hp<=0)killFx('you',t.uid);if(c.hp<=0)killFx('foe',c.uid);}else{floatHero('you','-'+c.atk);B.you.hp-=c.atk;}c.canAttack=false;});checkEnd();renderBattle();if(!B.over)setTimeout(startYourTurn,500);}
-function cryEffect(dmg){var b=B.foe.board;if(b.length){var t=b.reduce(function(a,c){return c.hp>a.hp?c:a;});floatAt(elFor('foe',t.uid),'-'+dmg);t.hp-=dmg;if(t.hp<=0)killFx('foe',t.uid);}else{floatHero('foe','-'+dmg);B.foe.hp-=dmg;}}
-function playCard(i){if(B.turnSide!=='you'||B.over||B.busy)return;var card=B.you.hand[i];if(!card)return;var sp=card.spec;if(card.cost>B.you.mana){sfx('err');toast('Mana insufficiente');return;}
- if(sp.t==='cre'){if(B.you.board.length>=7){toast('Campo pieno (max 7)');return;}B.you.mana-=card.cost;B.you.hand.splice(i,1);B.you.board.push({uid:nuid(),idx:card.idx,faction:card.faction,name:card.name,cost:card.cost,atk:sp.atk,hp:sp.hp,maxhp:sp.hp,taunt:!!sp.taunt,sick:!sp.charge,canAttack:!!sp.charge});if(sp.cry){renderBattle();cryEffect(sp.cry);}sfx('click');B.pending=null;checkEnd();renderBattle();return;}
+function startBattle(lvl){B={floor:lvl,turnSide:'you',phase:'main',over:false,pending:null,busy:false,attackers:[],blocks:{},blockSel:null,you:{hp:20,mana:0,maxMana:0,deck:buildBattleDeck(),hand:[],board:[]},foe:{hp:20+lvl*2,mana:0,maxMana:0,turn:0,board:[],hand:3}};setEss(S.ess-20);for(var i=0;i<3;i++)drawCard('you');document.getElementById('battle').classList.add('on');startYourTurn();if(!S.tut)document.getElementById('btut').classList.add('on');}
+function startYourTurn(){if(B.over)return;B.turnSide='you';B.phase='main';B.attackers=[];B.blocks={};B.blockSel=null;B.pending=null;B.you.maxMana=Math.min(10,B.you.maxMana+1);B.you.mana=B.you.maxMana;B.you.board.forEach(function(c){c.sick=false;c.tapped=false;});drawCard('you');showBanner('IL TUO TURNO','#5ad17a');renderBattle();}
+function endTurn(){if(B.over||B.turnSide!=='you'||B.phase!=='main')return;B.pending=null;foeTurn();}
+function foeTurn(){if(B.over)return;B.turnSide='foe';B.phase='main';B.foe.turn++;B.foe.maxMana=Math.min(10,B.foe.turn);B.foe.mana=B.foe.maxMana;B.foe.hand=Math.min(6,(B.foe.hand||0)+1);B.foe.board.forEach(function(c){c.sick=false;c.tapped=false;});showBanner('TURNO AVVERSARIO','#e24b4a');renderBattle();
+ var guard=0;while(B.foe.mana>=1&&B.foe.board.length<7&&B.foe.hand>0&&guard++<14){var cost=Math.min(B.foe.mana,1+Math.floor(Math.random()*3));var st=Math.max(1,cost+Math.floor(B.floor/2));B.foe.board.push({uid:nuid(),name:'Sgherro',cost:cost,atk:st,hp:st,maxhp:st,sick:true,tapped:false});B.foe.mana-=cost;B.foe.hand=Math.max(0,B.foe.hand-1);}
+ renderBattle();setTimeout(foeDeclareAttack,800);}
+function foeDeclareAttack(){if(B.over)return;var atk=B.foe.board.filter(function(c){return !c.tapped&&!c.sick&&c.atk>0;});if(!atk.length){setTimeout(startYourTurn,400);return;}atk.forEach(function(c){c.tapped=true;});B.attackers=atk.map(function(c){return c.uid;});B.blocks={};B.blockSel=null;B.phase='block';B.turnSide='foe';showBanner('DIFENDITI!','#e24b4a');renderBattle();}
+function aiBlock(attackerUids){var blocks={};var avail=B.foe.board.filter(function(c){return !c.tapped&&c.atk>=0;}).slice();
+ attackerUids.map(function(u){return findTok('you',u);}).filter(Boolean).sort(function(a,b){return b.atk-a.atk;}).forEach(function(att){
+  var best=null;avail.forEach(function(bl){if(bl.atk>=att.hp&&bl.hp>att.atk){if(!best||bl.hp<best.hp)best=bl;}});
+  if(!best)avail.forEach(function(bl){if(bl.atk>=att.hp){if(!best||bl.atk<best.atk)best=bl;}});
+  if(!best&&B.foe.hp<=att.atk)best=avail.slice().sort(function(a,b){return a.hp-b.hp;})[0];
+  if(best){blocks[att.uid]=best.uid;avail=avail.filter(function(x){return x!==best;});}});
+ return blocks;}
+function resolveCombat(attSide,defSide,attackerUids,blocks){attackerUids.forEach(function(au){var att=findTok(attSide,au);if(!att)return;var bu=blocks[au];if(bu){var bl=findTok(defSide,bu);if(bl){floatAt(elFor(defSide,bu),'-'+att.atk);floatAt(elFor(attSide,au),'-'+bl.atk);bl.hp-=att.atk;att.hp-=bl.atk;if(bl.hp<=0)killFx(defSide,bu);if(att.hp<=0)killFx(attSide,au);}}else{floatHero(defSide,'-'+att.atk);B[defSide].hp-=att.atk;}});}
+function confirmAttack(){if(B.busy||!B.attackers.length)return;B.busy=true;sfx('click');var list=B.attackers.slice();list.forEach(function(u){var c=findTok('you',u);if(c)c.tapped=true;});var blocks=aiBlock(list);resolveCombat('you','foe',list,blocks);B.attackers=[];B.busy=false;checkEnd();renderBattle();}
+function confirmBlock(){if(B.busy)return;B.busy=true;sfx('click');resolveCombat('foe','you',B.attackers.slice(),B.blocks);B.attackers=[];B.blocks={};B.blockSel=null;B.busy=false;checkEnd();renderBattle();if(!B.over)setTimeout(startYourTurn,550);}
+function playCard(i){if(B.turnSide!=='you'||B.phase!=='main'||B.over||B.busy)return;var card=B.you.hand[i];if(!card)return;var sp=card.spec;if(card.cost>B.you.mana){sfx('err');toast('Mana insufficiente');return;}
+ if(sp.t==='cre'){if(B.you.board.length>=7){toast('Campo pieno (max 7)');return;}B.you.mana-=card.cost;B.you.hand.splice(i,1);B.you.board.push({uid:nuid(),idx:card.idx,faction:card.faction,name:card.name,cost:card.cost,atk:sp.atk,hp:sp.hp,maxhp:sp.hp,haste:!!sp.haste,sick:!sp.haste,tapped:false});sfx('click');B.pending=null;checkEnd();renderBattle();return;}
  if(sp.need){B.pending={type:'spell',hi:i};sfx('click');renderBattle();return;}
  B.you.mana-=card.cost;B.you.hand.splice(i,1);applySpellNoTarget(sp);sfx('forge');B.pending=null;checkEnd();renderBattle();}
 function applySpellNoTarget(sp){if(sp.aoe)B.foe.board.slice().forEach(function(c){floatAt(elFor('foe',c.uid),'-'+sp.aoe);c.hp-=sp.aoe;if(c.hp<=0)killFx('foe',c.uid);});if(sp.draw)for(var n=0;n<sp.draw;n++)drawCard('you');if(sp.summon)for(var n=0;n<sp.summon.n;n++){if(B.you.board.length<7)B.you.board.push({uid:nuid(),faction:'natura',name:sp.summon.name,cost:1,atk:sp.summon.atk,hp:sp.summon.hp,maxhp:sp.summon.hp,taunt:false,sick:true,canAttack:false});}if(sp.healHero){floatHero('you','+'+sp.healHero);B.you.hp=Math.min(30,B.you.hp+sp.healHero);}}
@@ -543,29 +586,50 @@ function doAttack(uid,tuid){if(B.busy)return;var att=findTok('you',uid);if(!att)
   att.canAttack=false;if(att.hp<=0)killFx('you',att.uid);
   B.busy=false;checkEnd();renderBattle();
  },150);}
-function onTok(side,uid){if(B.over||B.busy)return;if(B.pending&&B.pending.type==='spell'){var need=B.you.hand[B.pending.hi].spec.need;if((need==='foeMinion'||need==='foeAny')&&side==='foe'){resolveSpell('foe',uid);return;}if(need==='allyMinion'&&side==='you'){resolveSpell('you',uid);return;}return;}
- if(side==='you'){var c=findTok('you',uid);if(!c)return;if(B.pending&&B.pending.type==='atk'&&B.pending.uid===uid){B.pending=null;renderBattle();return;}if(c.canAttack&&!c.sick){B.pending={type:'atk',uid:uid};sfx('click');renderBattle();}else if(c.sick){toast('Non può ancora attaccare');}return;}
- if(side==='foe'&&B.pending&&B.pending.type==='atk')doAttack(B.pending.uid,uid);}
-function onFoeHero(){if(B.over||B.busy||!B.pending)return;if(B.pending.type==='atk')doAttack(B.pending.uid,null);else if(B.pending.type==='spell'&&B.you.hand[B.pending.hi].spec.need==='foeAny')resolveSpell('foe',null);}
+function onTok(side,uid){if(B.over||B.busy)return;
+ if(B.pending&&B.pending.type==='spell'){var need=B.you.hand[B.pending.hi].spec.need;if((need==='foeMinion'||need==='foeAny')&&side==='foe'){resolveSpell('foe',uid);return;}if(need==='allyMinion'&&side==='you'){resolveSpell('you',uid);return;}return;}
+ if(B.phase==='block'){
+  if(side==='you'){var c=findTok('you',uid);if(c&&!c.tapped){B.blockSel=(B.blockSel===uid?null:uid);sfx('click');renderBattle();}else if(c&&c.tapped){toast('Impegnata: non può difendere');}return;}
+  if(side==='foe'&&B.attackers.indexOf(uid)>=0){if(B.blockSel){Object.keys(B.blocks).forEach(function(a){if(B.blocks[a]===B.blockSel)delete B.blocks[a];});B.blocks[uid]=B.blockSel;B.blockSel=null;sfx('click');renderBattle();}else{toast('Prima tocca una tua creatura che difende');}return;}
+  return;}
+ if(B.turnSide==='you'&&side==='you'){var c2=findTok('you',uid);if(!c2)return;if(c2.atk<=0){toast('Attacco 0: non può attaccare (ma può difendere)');return;}if(c2.sick){toast('Evocata da poco: non può ancora attaccare');return;}if(c2.tapped){toast('Già impegnata questo turno');return;}var k=B.attackers.indexOf(uid);if(k>=0)B.attackers.splice(k,1);else B.attackers.push(uid);sfx('click');renderBattle();}}
+function onFoeHero(){if(B.over||B.busy||!B.pending)return;if(B.pending.type==='spell'&&B.you.hand[B.pending.hi].spec.need==='foeAny')resolveSpell('foe',null);}
 function elFor(side,uid){return document.querySelector('.bc[data-side="'+side+'"][data-uid="'+uid+'"]');}
 function floatHero(side,text){floatAt(document.getElementById(side==='foe'?'b-foehero':'b-myhp'),text,side==='you'&&text.charAt(0)==='+'?'#9be38f':null);}
 function floatAt(el,text,color){if(!el)return;var b=document.getElementById('battle');var br=b.getBoundingClientRect(),r=el.getBoundingClientRect();var f=document.createElement('div');f.className='dmgf';f.style.left=(r.left-br.left+r.width/2-14)+'px';f.style.top=(r.top-br.top+r.height/2-12)+'px';f.style.color=color||'#ff6a6a';f.textContent=text;b.appendChild(f);setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f);},760);}
 function shatterAt(el){if(!el)return;var b=document.getElementById('battle');var br=b.getBoundingClientRect(),r=el.getBoundingClientRect();var cx=r.left-br.left+r.width/2,cy=r.top-br.top+r.height/2;var cols=['#a3343f','#e8743b','#ead7a3','#5e1b22','#9a93c4'];for(var i=0;i<10;i++){var p=document.createElement('div');p.className='shard';var ang=Math.random()*6.28,dist=16+Math.random()*26;p.style.left=cx+'px';p.style.top=cy+'px';p.style.setProperty('--dx',(Math.cos(ang)*dist)+'px');p.style.setProperty('--dy',(Math.sin(ang)*dist)+'px');p.style.background=cols[i%cols.length];b.appendChild(p);(function(pp){setTimeout(function(){if(pp.parentNode)pp.parentNode.removeChild(pp);},520);})(p);}}
 function killFx(side,uid){var el=elFor(side,uid);if(el)shatterAt(el);removeTok(side,uid);}
 function bcardVisual(o){var fc=o.faction?FACT[o.faction]:{bg:'#34304f',lt:'#56507a',dk:'#211f38',gem:'#8a83b8'};var card=document.createElement('div');card.className='bc';var fr=document.createElement('div');fr.className='bcf';fr.style.background=fc.bg;fr.style.borderColor=fc.lt+' '+fc.dk+' '+fc.dk+' '+fc.lt;fr.innerHTML='<div class="bch"><div class="bcc" style="background:'+fc.gem+'">'+o.cost+'</div><div class="bcn">'+o.name+'</div></div>';var art=document.createElement('div');if(o.idx!=null&&CARDS[o.idx]&&CARDS[o.idx].rows){art.className='bca';art.appendChild(artCanvas(CARDS[o.idx]));}else{art.className='bca noart';art.innerHTML='<span style="font-size:20px">'+(o.isSpell?'✦':'⚔')+'</span>';}fr.appendChild(art);if(o.isSpell){var sp=document.createElement('div');sp.className='bcsp';sp.textContent='magia';fr.appendChild(sp);}else{var ft=document.createElement('div');ft.className='bcft';ft.innerHTML='<span class="bcg atk">'+o.atk+'</span><span class="bcg hp'+(o.maxhp&&o.hp<o.maxhp?' dmg':'')+'">'+o.hp+'</span>';fr.appendChild(ft);}card.appendChild(fr);return card;}
-function tokEl(c,side){var el=bcardVisual({idx:c.idx,faction:c.faction,name:c.name,cost:c.cost,atk:c.atk,hp:c.hp,maxhp:c.maxhp,isSpell:false});el.classList.add('board');el.setAttribute('data-side',side);el.setAttribute('data-uid',c.uid);if(c.taunt)el.querySelector('.bcf').style.boxShadow='0 0 0 3px #e8b04a';
- if(side==='you'){if(c.sick){el.classList.add('sick');el.insertAdjacentHTML('beforeend','<div class="bstatus w">attendi</div>');}else if(c.canAttack){el.classList.add('ready');el.insertAdjacentHTML('beforeend','<div class="bstatus r">▲ pronta</div>');}else{el.classList.add('used');el.insertAdjacentHTML('beforeend','<div class="bstatus u">stanca</div>');}}
- if(side==='you'&&B.pending&&B.pending.type==='atk'&&B.pending.uid===c.uid)el.classList.add('sel');var tg=false;if(B.pending){if(B.pending.type==='atk'&&side==='foe'){var tn=B.foe.board.filter(function(x){return x.taunt;});tg=!tn.length||c.taunt;}else if(B.pending.type==='spell'){var need=B.you.hand[B.pending.hi].spec.need;tg=((need==='foeMinion'||need==='foeAny')&&side==='foe')||(need==='allyMinion'&&side==='you');}}if(tg)el.classList.add('tgt');el.onclick=function(){onTok(side,c.uid);};return el;}
+function tokEl(c,side){var el=bcardVisual({idx:c.idx,faction:c.faction,name:c.name,cost:c.cost,atk:c.atk,hp:c.hp,maxhp:c.maxhp,isSpell:false});el.classList.add('board');el.setAttribute('data-side',side);el.setAttribute('data-uid',c.uid);if(c.haste)el.querySelector('.bcf').style.boxShadow='0 0 0 2px #ffd27a';
+ var st='';
+ if(side==='you'){
+  if(B.phase==='block'){var isB=false;Object.keys(B.blocks).forEach(function(a){if(B.blocks[a]===c.uid)isB=true;});if(B.blockSel===c.uid){el.classList.add('sel');st='<div class="bstatus r">difende?</div>';}else if(isB){el.classList.add('blocking');st='<div class="bstatus r">difende</div>';}else if(c.tapped){el.classList.add('used');st='<div class="bstatus u">impegnata</div>';}else{el.classList.add('canpick');st='<div class="bstatus w">può difendere</div>';}}
+  else{if(B.attackers.indexOf(c.uid)>=0){el.classList.add('atking');st='<div class="bstatus a">attacca →</div>';}else if(c.tapped){el.classList.add('used');st='<div class="bstatus u">impegnata</div>';}else if(c.sick){el.classList.add('sick');st='<div class="bstatus w">evocata</div>';}else if(c.atk>0){el.classList.add('ready');st='<div class="bstatus r">pronta</div>';}else st='<div class="bstatus u">difensore</div>';}
+ }else{
+  if(B.phase==='block'&&B.attackers.indexOf(c.uid)>=0){if(B.blocks[c.uid]){el.classList.add('blocked');st='<div class="bstatus r">bloccata</div>';}else{el.classList.add('atking-foe');st='<div class="bstatus a">ti attacca!</div>';if(B.blockSel)el.classList.add('tgt');}}else if(c.tapped)el.classList.add('used');
+ }
+ if(st)el.insertAdjacentHTML('beforeend',st);
+ if(B.pending&&B.pending.type==='spell'){var need=B.you.hand[B.pending.hi].spec.need;if(((need==='foeMinion'||need==='foeAny')&&side==='foe')||(need==='allyMinion'&&side==='you'))el.classList.add('tgt');}
+ el.onclick=function(){onTok(side,c.uid);};return el;}
 function renderBattle(){if(!B)return;
- var foeTgt=B.pending&&((B.pending.type==='atk'&&!B.foe.board.some(function(x){return x.taunt;}))||(B.pending.type==='spell'&&B.you.hand[B.pending.hi].spec.need==='foeAny'));
- var fh=document.getElementById('b-foehero');fh.className='bhero foe'+(foeTgt?' tgt':'');fh.innerHTML='<span class="blab">'+(B.floor>=7?'Signore del Drago':'Avversario · Piano '+B.floor)+'</span><span class="hstat">'+crystals(B.foe.mana,B.foe.maxMana)+heart(B.foe.hp,false)+'</span>';fh.onclick=onFoeHero;
+ var fh=document.getElementById('b-foehero');var foeSpellTgt=B.pending&&B.pending.type==='spell'&&B.you.hand[B.pending.hi].spec.need==='foeAny';fh.className='bhero foe'+(foeSpellTgt?' tgt':'');fh.innerHTML='<div class="foeport">'+(B.floor>=7?'♛':'☠')+'</div><div class="finfo"><div class="blab">'+(B.floor>=7?'Signore del Drago':'Avversario · Piano '+B.floor)+'</div>'+crystals(B.foe.mana,B.foe.maxMana)+'</div>'+heart(B.foe.hp,false);fh.onclick=onFoeHero;
  var fhand=document.getElementById('b-foehand');var bs='';for(var bi=0;bi<(B.foe.hand||0);bi++)bs+='<div class="bback">★</div>';fhand.innerHTML=bs;
  var fb=document.getElementById('b-foeboard');fb.innerHTML='';B.foe.board.forEach(function(c){fb.appendChild(tokEl(c,'foe'));});
  var mb=document.getElementById('b-myboard');mb.innerHTML='';B.you.board.forEach(function(c){mb.appendChild(tokEl(c,'you'));});
  document.getElementById('b-myhp').innerHTML=heart(B.you.hp,true);document.getElementById('b-mymana').innerHTML=crystals(B.you.mana,B.you.maxMana);
- var et=document.getElementById('b-endturn');et.className='endt'+(B.turnSide!=='you'?' off':'');
- var h=document.getElementById('b-hand');h.innerHTML='';B.you.hand.forEach(function(card,i){var sp=card.spec||{};var el=bcardVisual({idx:card.idx,faction:card.faction,name:card.name,cost:card.cost,atk:sp.atk,hp:sp.hp,isSpell:sp.t!=='cre'});el.classList.add('hand');if(card.cost>B.you.mana||B.turnSide!=='you')el.classList.add('no');if(B.pending&&B.pending.type==='spell'&&B.pending.hi===i)el.classList.add('sel');el.onclick=function(){if(B.pending&&B.pending.type==='spell'&&B.pending.hi===i){B.pending=null;renderBattle();}else playCard(i);};h.appendChild(el);});
- var instr;if(B.over)instr='';else if(B.turnSide!=='you')instr='L’avversario sta giocando…';else if(B.pending&&B.pending.type==='atk')instr='Tocca CHI colpire: una creatura nemica o l’avversario in alto';else if(B.pending&&B.pending.type==='spell')instr='Tocca il BERSAGLIO dell’incantesimo';else instr='Gioca una carta, o tocca una creatura PRONTA (verde) per attaccare';document.getElementById('b-instr').textContent=instr;}
+ var et=document.getElementById('b-endturn'),act=document.getElementById('b-action');
+ if(B.phase==='block'){et.style.display='none';act.style.display='inline-block';act.textContent='Conferma difesa';act.onclick=confirmBlock;}
+ else if(B.turnSide==='you'){et.style.display='inline-block';et.className='endt';if(B.attackers.length){act.style.display='inline-block';act.textContent='⚔ Attacca ('+B.attackers.length+')';act.onclick=confirmAttack;}else act.style.display='none';}
+ else{et.style.display='none';act.style.display='none';}
+ var h=document.getElementById('b-hand');h.innerHTML='';B.you.hand.forEach(function(card,i){var sp=card.spec||{};var el=bcardVisual({idx:card.idx,faction:card.faction,name:card.name,cost:card.cost,atk:sp.atk,hp:sp.hp,isSpell:sp.t!=='cre'});el.classList.add('hand');if(card.cost>B.you.mana||B.turnSide!=='you'||B.phase!=='main')el.classList.add('no');if(B.pending&&B.pending.type==='spell'&&B.pending.hi===i)el.classList.add('sel');el.onclick=function(){if(B.pending&&B.pending.type==='spell'&&B.pending.hi===i){B.pending=null;renderBattle();}else playCard(i);};h.appendChild(el);});
+ var phase,instr;
+ if(B.over){phase='';instr='';}
+ else if(B.phase==='block'){phase='DIFESA';instr='Tocca una tua creatura, poi l’attaccante che blocca. Le non bloccate ti colpiscono. Poi «Conferma difesa».';}
+ else if(B.turnSide!=='you'){phase='TURNO AVVERSARIO';instr='L’avversario sta giocando…';}
+ else if(B.pending&&B.pending.type==='spell'){phase='MAGIA';instr='Tocca il bersaglio dell’incantesimo.';}
+ else if(B.attackers.length){phase='ATTACCO';instr='Premi «Attacca» per dichiarare. L’avversario potrà bloccare.';}
+ else{phase='IL TUO TURNO';instr='Gioca carte; tocca le creature PRONTE (verde) per attaccare; poi «Attacca». Oppure «Fine turno».';}
+ setTurnMsg(phase);document.getElementById('b-instr').textContent=instr;}
 function checkEnd(){if(B.over)return;if(B.foe.hp<=0){B.over=true;battleEnd(true);}else if(B.you.hp<=0){B.over=true;battleEnd(false);}}
 function battleEnd(win){setTurnMsg('');var m=document.getElementById('b-msg');m.style.display='block';m.textContent=win?'VITTORIA':'SCONFITTA';var rew=15+B.floor*8;if(win){sfx('forge');S.ess+=rew;if(B.floor>(S.towerMax||0))S.towerMax=B.floor;save();}else sfx('err');setTimeout(function(){document.getElementById('battle').classList.remove('on');m.style.display='none';setEss(S.ess);renderTorre();toast(win?'Vittoria! +'+rew+' essenza':'Sconfitta — torna più forte');},1700);}
 document.getElementById('b-endturn').onclick=function(){sfx('click');endTurn();};
