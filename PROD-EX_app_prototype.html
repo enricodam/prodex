@@ -10,6 +10,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PROD-EX">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -129,6 +131,9 @@ body{background:#07060f;font-family:'Pixelify Sans',sans-serif;color:#cdbef0;dis
 .cat.edit{background:transparent;border-style:dashed;color:var(--mut)}
 .tickbtn{display:inline-block;font-size:12px;color:var(--mut);background:var(--ind2);border:2px solid #000;border-radius:14px;padding:6px 12px;cursor:pointer;font-weight:600}
 .tickbtn.on{background:#3a3470;color:var(--cream);border-color:#7f77dd}
+#qrbox{text-align:center}
+#qrbox img{background:#fff;padding:10px;border-radius:8px;max-width:220px;image-rendering:pixelated}
+#scanbox{border-radius:8px;overflow:hidden;max-width:300px;margin:6px auto}
 .tasks{display:flex;flex-direction:column;gap:6px}
 .task{display:flex;align-items:center;gap:8px;background:var(--ind2);border:2px solid #000;border-radius:8px;padding:8px 10px;cursor:pointer}
 .task.sel{border-color:#e8743b}
@@ -341,10 +346,13 @@ textarea.code{width:100%;height:90px;background:var(--blk);border:2px solid #000
     <div class="lbl">I progressi si salvano <b>da soli</b> su questo dispositivo: riaprendo l'app ritrovi tutto. Usa il codice qui sotto per spostarli su un altro device o come backup.</div>
     <div class="lbl">Il tuo codice (copialo e conservalo):</div>
     <textarea class="code" id="savecode" readonly></textarea>
-    <div class="btnrow" style="margin-top:8px"><div class="btn go" id="b-copy">Copia codice</div></div>
-    <div class="lbl">Incolla un codice per riprendere su questo dispositivo:</div>
+    <div class="btnrow" style="margin-top:8px"><div class="btn go" id="b-copy">Copia codice</div><div class="btn" id="b-qr">Mostra QR</div></div>
+    <div id="qrbox"></div>
+    <div class="lbl">Riprendi su questo dispositivo: incolla un codice oppure scansiona un QR mostrato da un altro device.</div>
     <textarea class="code" id="loadcode" placeholder="incolla qui..."></textarea>
-    <div class="btnrow" style="margin-top:8px"><div class="btn" id="b-load">Carica codice</div><div class="btn" id="b-saveclose">Chiudi</div></div>
+    <div class="btnrow" style="margin-top:8px"><div class="btn" id="b-load">Carica codice</div><div class="btn" id="b-scan">Scansiona QR</div></div>
+    <div id="scanbox"></div>
+    <div class="btnrow" style="margin-top:8px"><div class="btn" id="b-saveclose">Chiudi</div></div>
     <div class="btnrow" style="margin-top:14px"><div class="btn" id="b-update">Aggiorna app</div><div class="btn" id="b-reset" style="border-color:#7a1f1f;color:#ffb3b3">Nuova partita</div></div>
     <div class="lbl" id="verlbl" style="text-align:center;margin-top:10px;opacity:.65"></div>
   </div></div>
@@ -423,7 +431,7 @@ function cardEl(c,locked){var fc=FACT[c.f];var d=document.createElement('div');d
  fr.appendChild(foot);d.appendChild(fr);return d;}
 
 /* ---- state ---- */
-var KEY='prodex_v2_state';var APP_VER='1.1';
+var KEY='prodex_v2_state';var APP_VER='1.2';
 function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
 var S=load()||{ess:150,coll:{},daily:{},totalMin:0,seen:false};
 if(!S.daily)S.daily={};if(!S.coll)S.coll={};if(!S.deck)S.deck={};if(S.totalMin==null)S.totalMin=0;if(!S.cat)S.cat={};
@@ -525,11 +533,16 @@ document.getElementById('topttl').onclick=function(){document.getElementById('in
 /* ---- salva / carica ---- */
 function enc(){return 'PRODEX1:'+btoa(unescape(encodeURIComponent(JSON.stringify(S))));}
 document.getElementById('b-save').onclick=function(){document.getElementById('savecode').value=enc();document.getElementById('loadcode').value='';document.getElementById('verlbl').textContent='PROD-EX versione '+APP_VER;document.getElementById('save').classList.add('on');};
-document.getElementById('b-saveclose').onclick=function(){document.getElementById('save').classList.remove('on');};
+document.getElementById('b-saveclose').onclick=function(){stopScan();document.getElementById('qrbox').innerHTML='';document.getElementById('save').classList.remove('on');};
 document.getElementById('b-reset').onclick=function(){if(confirm('Nuova partita: perderai i progressi su questo dispositivo (essenza, carte, mazzo, statistiche). Se vuoi tenerli, prima copia il codice. Procedere?')){localStorage.removeItem(KEY);location.reload();}};
 document.getElementById('b-update').onclick=function(){toast('Aggiorno…');(async function(){try{if('serviceWorker' in navigator){var rs=await navigator.serviceWorker.getRegistrations();for(var i=0;i<rs.length;i++)await rs[i].unregister();}if(window.caches){var ks=await caches.keys();for(var j=0;j<ks.length;j++)await caches.delete(ks[j]);}}catch(e){}location.reload(true);})();};
 document.getElementById('b-copy').onclick=function(){var t=document.getElementById('savecode');t.select();try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}toast('Codice copiato');};
-document.getElementById('b-load').onclick=function(){var raw=document.getElementById('loadcode').value;var i=raw.indexOf('PRODEX1:');if(i<0){toast('Codice non valido');return;}var v=raw.slice(i+8).replace(/\s+/g,'');try{var o=JSON.parse(decodeURIComponent(escape(atob(v))));if(typeof o.ess!=='number'||!o.coll)throw 0;S=o;if(!S.daily)S.daily={};if(!S.deck)S.deck={};if(S.totalMin==null)S.totalMin=0;if(!S.cat)S.cat={};if(!S.cats){S.cats=DEFAULTCATS.map(function(c){return {k:c.k,n:c.n};});S.catSeq=S.cats.length+1;}if(!S.catSel||!S.cats.some(function(c){return c.k===S.catSel;}))S.catSel=S.cats[0].k;if(S.towerMax==null)S.towerMax=0;if(!S.tasks)S.tasks=[];if(S.taskSeq==null)S.taskSeq=1;save();document.getElementById('save').classList.remove('on');setEss(S.ess);renderColl();renderDeck();renderCats();renderTasks();renderDiario();renderTorre();updMute();toast('Salvataggio caricato!');}catch(e){toast('Codice non valido');}};
+function loadCode(raw){var i=(raw||'').indexOf('PRODEX1:');if(i<0){toast('Codice non valido');return false;}var v=raw.slice(i+8).replace(/\s+/g,'');try{var o=JSON.parse(decodeURIComponent(escape(atob(v))));if(typeof o.ess!=='number'||!o.coll)throw 0;S=o;if(!S.daily)S.daily={};if(!S.deck)S.deck={};if(S.totalMin==null)S.totalMin=0;if(!S.cat)S.cat={};if(!S.cats){S.cats=DEFAULTCATS.map(function(c){return {k:c.k,n:c.n};});S.catSeq=S.cats.length+1;}if(!S.catSel||!S.cats.some(function(c){return c.k===S.catSel;}))S.catSel=S.cats[0].k;if(S.towerMax==null)S.towerMax=0;if(!S.tasks)S.tasks=[];if(S.taskSeq==null)S.taskSeq=1;save();document.getElementById('save').classList.remove('on');setEss(S.ess);renderColl();renderDeck();renderCats();renderTasks();renderDiario();renderTorre();updMute();toast('Salvataggio caricato!');return true;}catch(e){toast('Codice non valido');return false;}}
+document.getElementById('b-load').onclick=function(){loadCode(document.getElementById('loadcode').value);};
+var qrScanner=null;
+function stopScan(){if(qrScanner){try{qrScanner.stop().catch(function(){});}catch(e){}qrScanner=null;}var sb=document.getElementById('scanbox');if(sb)sb.innerHTML='';}
+document.getElementById('b-qr').onclick=function(){var box=document.getElementById('qrbox');if(box.innerHTML){box.innerHTML='';return;}if(typeof qrcode==='undefined'){toast('QR non pronto — riprova fra un attimo (serve una volta online)');return;}try{var url=location.origin+location.pathname+'#'+enc();var q=qrcode(0,'M');q.addData(url);q.make();box.innerHTML=q.createImgTag(4,8);sfx('click');}catch(e){box.innerHTML='';toast('Salvataggio troppo grande per il QR — usa il codice');}};
+document.getElementById('b-scan').onclick=function(){if(typeof Html5Qrcode==='undefined'){toast('Scanner non pronto — apri l’app online una volta');return;}var sb=document.getElementById('scanbox');if(qrScanner){stopScan();return;}sb.innerHTML='<div id="scanview"></div>';qrScanner=new Html5Qrcode('scanview');qrScanner.start({facingMode:'environment'},{fps:10,qrbox:200},function(txt){stopScan();loadCode(txt);}).catch(function(){toast('Camera non disponibile');stopScan();});sfx('click');};
 
 /* ---- battaglia (Hearthstone-like ridotto) ---- */
 var BATTLE={
@@ -653,6 +666,7 @@ document.getElementById('b-help').onclick=function(){document.getElementById('bt
 if(S.towerMax==null)S.towerMax=0;
 setEss(S.ess);updTimer();renderCats();renderTasks();renderColl();renderDeck();renderDiario();renderTorre();updMute();updTick();
 if(!S.seen)document.getElementById('intro').classList.add('on');
+if(location.hash&&location.hash.indexOf('PRODEX1:')>=0){var _hc=decodeURIComponent(location.hash.replace(/^#/,''));try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}setTimeout(function(){if(confirm('Caricare il salvataggio da questo link/QR? Sostituirà i progressi attuali su questo dispositivo.'))loadCode(_hc);},400);}
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 </body></html>
