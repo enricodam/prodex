@@ -15,6 +15,14 @@ Il tuo lavoro vero (minuti di concentrazione) diventa *essenza*. Con l'essenza *
 
 I progressi si salvano automaticamente nel browser (`localStorage`). Dal pulsante **SALVA** ottieni un codice testuale per esportare/importare la partita su un altro dispositivo.
 
+## Installa come app
+
+PROD-EX è una **PWA**: puoi installarlo come app a tutto schermo, con icona.
+
+- **iPhone / iPad (Safari)**: apri la pagina → tocca *Condividi* → **Aggiungi a Home**.
+- **Mac / Windows (Chrome o Edge)**: apri la pagina → icona **Installa** nella barra degli indirizzi (o menu ⋮ → *Installa PROD-EX*).
+- **Android (Chrome)**: menu → *Installa app* / *Aggiungi a schermata Home*.
+
 ## Il ciclo di gioco
 
 ```
@@ -78,6 +86,10 @@ Per **espandere il set**: aggiungi un nuovo foglio in `sources/`, registra le ca
 ## Tecnologia
 
 HTML/CSS/JavaScript vanilla, nessuna dipendenza a runtime, nessun build step. Audio retro generato con la Web Audio API. Salvataggio in `localStorage`. I font del gioco arrivano da Google Fonts via CDN.
+
+## Autore
+
+Creato da **Enrico D'Ambrosio** — GitHub [@enricodam](https://github.com/enricodam).
 
 ## Licenza
 

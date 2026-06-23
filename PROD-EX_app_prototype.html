@@ -1,7 +1,15 @@
 <!DOCTYPE html>
 <html lang="it"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>PROD-EX v2.0 — Prototipo</title>
+<title>PROD-EX</title>
+<meta name="theme-color" content="#13112a">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PROD-EX">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -640,4 +648,6 @@ document.getElementById('b-help').onclick=function(){document.getElementById('bt
 if(S.towerMax==null)S.towerMax=0;
 setEss(S.ess);updTimer();renderCats();renderTasks();renderColl();renderDeck();renderDiario();renderTorre();updMute();updTick();
 if(!S.seen)document.getElementById('intro').classList.add('on');
-</script></body></html>
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</body></html>
