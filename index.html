@@ -358,7 +358,7 @@ textarea.code{width:100%;height:90px;background:var(--blk);border:2px solid #000
     <h2>Come leggere una carta</h2>
     <div id="ci-card" style="display:flex;justify-content:center;margin:10px 0"></div>
     <div class="cilegend">
-      <div><span class="cidot" style="background:#4a90e2"></span><b>Costo</b> (cerchio in alto a sinistra): il <b>mana</b> che spendi per giocarla in battaglia.</div>
+      <div><span class="cidot" style="background:#4a90e2"></span><b>Costo</b> (cerchio in alto a sinistra): l'<b>energia</b> che spendi per giocarla in battaglia (i diamanti blu).</div>
       <div><span class="cidot" style="background:#e8743b"></span><b>Attacco</b> (gemma arancione in basso a sinistra): i danni che infligge.</div>
       <div><span class="cidot" style="background:#b3322f"></span><b>Vita</b> (gemma rossa in basso a destra): quanti danni regge prima di essere distrutta.</div>
       <div><span class="cidot" style="background:#a06fd6"></span><b>Tipo e rarità</b> (riga centrale): se è Creatura o Magia, e quanto è rara/potente.</div>
@@ -390,7 +390,7 @@ textarea.code{width:100%;height:90px;background:var(--blk);border:2px solid #000
   <div class="bmsg" id="b-msg" style="display:none"></div>
   <div class="ov" id="btut"><div class="panel">
     <h2>Come si combatte</h2>
-    <div class="rule"><span class="e">1</span><span>Nel tuo turno giochi le <b>carte</b> dalla mano: costano <b>mana</b> (i diamanti blu), che cresce di 1 ogni turno.</span></div>
+    <div class="rule"><span class="e">1</span><span>Nel tuo turno giochi le <b>carte</b> dalla mano: costano <b>energia</b> (i diamanti blu), che cresce di 1 ogni turno.</span></div>
     <div class="rule"><span class="e">2</span><span>Le <b>creature</b> non possono attaccare il turno in cui le giochi — tranne quelle con <b>Rapidità</b>.</span></div>
     <div class="rule"><span class="e">3</span><span><b>Attacco</b>: tocca le tue creature pronte (le selezioni), poi premi <b>«Attacca»</b>. L'avversario può <b>bloccare</b>; i danni non bloccati colpiscono i suoi PV.</span></div>
     <div class="rule"><span class="e">4</span><span><b>Difesa</b>: quando l'avversario attacca, tocca una tua creatura e poi l'attaccante per <b>bloccarlo</b>. Una creatura che ha attaccato è <b>impegnata</b> e non può difendere.</span></div>
@@ -575,9 +575,9 @@ function aiBlock(attackerUids){var blocks={};var avail=B.foe.board.filter(functi
 function resolveCombat(attSide,defSide,attackerUids,blocks){attackerUids.forEach(function(au){var att=findTok(attSide,au);if(!att)return;var bu=blocks[au];if(bu){var bl=findTok(defSide,bu);if(bl){floatAt(elFor(defSide,bu),'-'+att.atk);floatAt(elFor(attSide,au),'-'+bl.atk);bl.hp-=att.atk;att.hp-=bl.atk;if(bl.hp<=0)killFx(defSide,bu);if(att.hp<=0)killFx(attSide,au);}}else{floatHero(defSide,'-'+att.atk);B[defSide].hp-=att.atk;}});}
 function confirmAttack(){if(B.busy||!B.attackers.length)return;B.busy=true;sfx('click');var list=B.attackers.slice();list.forEach(function(u){var c=findTok('you',u);if(c)c.tapped=true;});var blocks=aiBlock(list);resolveCombat('you','foe',list,blocks);B.attackers=[];B.busy=false;checkEnd();renderBattle();}
 function confirmBlock(){if(B.busy)return;B.busy=true;sfx('click');resolveCombat('foe','you',B.attackers.slice(),B.blocks);B.attackers=[];B.blocks={};B.blockSel=null;B.busy=false;checkEnd();renderBattle();if(!B.over)setTimeout(startYourTurn,550);}
-function playCard(i){if(B.turnSide!=='you'||B.phase!=='main'||B.over||B.busy)return;var card=B.you.hand[i];if(!card)return;var sp=card.spec;if(card.cost>B.you.mana){sfx('err');toast('Mana insufficiente');return;}
+function playCard(i){if(B.turnSide!=='you'||B.phase!=='main'||B.over||B.busy)return;var card=B.you.hand[i];if(!card)return;var sp=card.spec;if(card.cost>B.you.mana){sfx('err');toast('Energia insufficiente (cresce di 1 ogni turno)');return;}
  if(sp.t==='cre'){if(B.you.board.length>=7){toast('Campo pieno (max 7)');return;}B.you.mana-=card.cost;B.you.hand.splice(i,1);B.you.board.push({uid:nuid(),idx:card.idx,faction:card.faction,name:card.name,cost:card.cost,atk:sp.atk,hp:sp.hp,maxhp:sp.hp,haste:!!sp.haste,sick:!sp.haste,tapped:false});sfx('click');B.pending=null;checkEnd();renderBattle();return;}
- if(sp.need){B.pending={type:'spell',hi:i};sfx('click');renderBattle();return;}
+ if(sp.need){var has=sp.need==='foeAny'?true:(sp.need==='foeMinion'?B.foe.board.length>0:B.you.board.length>0);if(!has){sfx('err');toast(sp.need==='allyMinion'?'Nessuna tua creatura da potenziare':'Nessun bersaglio per questa magia');return;}B.pending={type:'spell',hi:i};sfx('click');renderBattle();return;}
  B.you.mana-=card.cost;B.you.hand.splice(i,1);applySpellNoTarget(sp);sfx('forge');B.pending=null;checkEnd();renderBattle();}
 function applySpellNoTarget(sp){if(sp.aoe)B.foe.board.slice().forEach(function(c){floatAt(elFor('foe',c.uid),'-'+sp.aoe);c.hp-=sp.aoe;if(c.hp<=0)killFx('foe',c.uid);});if(sp.draw)for(var n=0;n<sp.draw;n++)drawCard('you');if(sp.summon)for(var n=0;n<sp.summon.n;n++){if(B.you.board.length<7)B.you.board.push({uid:nuid(),faction:'natura',name:sp.summon.name,cost:1,atk:sp.summon.atk,hp:sp.summon.hp,maxhp:sp.summon.hp,taunt:false,sick:true,canAttack:false});}if(sp.healHero){floatHero('you','+'+sp.healHero);B.you.hp=Math.min(30,B.you.hp+sp.healHero);}}
 function resolveSpell(side,uid){var p=B.pending,card=B.you.hand[p.hi],sp=card.spec;B.you.mana-=card.cost;B.you.hand.splice(p.hi,1);
@@ -634,7 +634,7 @@ function renderBattle(){if(!B)return;
  if(B.over){phase='';instr='';}
  else if(B.phase==='block'){phase='DIFESA';instr='Tocca una tua creatura, poi l’attaccante che blocca. Le non bloccate ti colpiscono. Poi «Conferma difesa».';}
  else if(B.turnSide!=='you'){phase='TURNO AVVERSARIO';instr='L’avversario sta giocando…';}
- else if(B.pending&&B.pending.type==='spell'){phase='MAGIA';instr='Tocca il bersaglio dell’incantesimo.';}
+ else if(B.pending&&B.pending.type==='spell'){phase='MAGIA';instr='Tocca il bersaglio della magia (o di nuovo la carta per annullare).';}
  else if(B.attackers.length){phase='ATTACCO';instr='Premi «Attacca» per dichiarare. L’avversario potrà bloccare.';}
  else{phase='IL TUO TURNO';instr='Gioca carte; tocca le creature PRONTE (verde) per attaccare; poi «Attacca». Oppure «Fine turno».';}
  setTurnMsg(phase);document.getElementById('b-instr').textContent=instr;}
