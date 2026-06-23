@@ -423,7 +423,7 @@ function cardEl(c,locked){var fc=FACT[c.f];var d=document.createElement('div');d
  fr.appendChild(foot);d.appendChild(fr);return d;}
 
 /* ---- state ---- */
-var KEY='prodex_v2_state';var APP_VER='1.0';
+var KEY='prodex_v2_state';var APP_VER='1.1';
 function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
 var S=load()||{ess:150,coll:{},daily:{},totalMin:0,seen:false};
 if(!S.daily)S.daily={};if(!S.coll)S.coll={};if(!S.deck)S.deck={};if(S.totalMin==null)S.totalMin=0;if(!S.cat)S.cat={};
@@ -529,7 +529,7 @@ document.getElementById('b-saveclose').onclick=function(){document.getElementByI
 document.getElementById('b-reset').onclick=function(){if(confirm('Nuova partita: perderai i progressi su questo dispositivo (essenza, carte, mazzo, statistiche). Se vuoi tenerli, prima copia il codice. Procedere?')){localStorage.removeItem(KEY);location.reload();}};
 document.getElementById('b-update').onclick=function(){toast('Aggiorno…');(async function(){try{if('serviceWorker' in navigator){var rs=await navigator.serviceWorker.getRegistrations();for(var i=0;i<rs.length;i++)await rs[i].unregister();}if(window.caches){var ks=await caches.keys();for(var j=0;j<ks.length;j++)await caches.delete(ks[j]);}}catch(e){}location.reload(true);})();};
 document.getElementById('b-copy').onclick=function(){var t=document.getElementById('savecode');t.select();try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}toast('Codice copiato');};
-document.getElementById('b-load').onclick=function(){var v=document.getElementById('loadcode').value.trim();if(v.indexOf('PRODEX1:')!==0){toast('Codice non valido');return;}try{var o=JSON.parse(decodeURIComponent(escape(atob(v.slice(8)))));if(typeof o.ess!=='number'||!o.coll)throw 0;S=o;if(!S.daily)S.daily={};if(!S.deck)S.deck={};if(S.totalMin==null)S.totalMin=0;if(!S.cat)S.cat={};if(!S.cats){S.cats=DEFAULTCATS.map(function(c){return {k:c.k,n:c.n};});S.catSeq=S.cats.length+1;}if(!S.catSel||!S.cats.some(function(c){return c.k===S.catSel;}))S.catSel=S.cats[0].k;if(S.towerMax==null)S.towerMax=0;if(!S.tasks)S.tasks=[];if(S.taskSeq==null)S.taskSeq=1;save();document.getElementById('save').classList.remove('on');setEss(S.ess);renderColl();renderDeck();renderCats();renderTasks();renderDiario();renderTorre();updMute();toast('Salvataggio caricato!');}catch(e){toast('Codice non valido');}};
+document.getElementById('b-load').onclick=function(){var raw=document.getElementById('loadcode').value;var i=raw.indexOf('PRODEX1:');if(i<0){toast('Codice non valido');return;}var v=raw.slice(i+8).replace(/\s+/g,'');try{var o=JSON.parse(decodeURIComponent(escape(atob(v))));if(typeof o.ess!=='number'||!o.coll)throw 0;S=o;if(!S.daily)S.daily={};if(!S.deck)S.deck={};if(S.totalMin==null)S.totalMin=0;if(!S.cat)S.cat={};if(!S.cats){S.cats=DEFAULTCATS.map(function(c){return {k:c.k,n:c.n};});S.catSeq=S.cats.length+1;}if(!S.catSel||!S.cats.some(function(c){return c.k===S.catSel;}))S.catSel=S.cats[0].k;if(S.towerMax==null)S.towerMax=0;if(!S.tasks)S.tasks=[];if(S.taskSeq==null)S.taskSeq=1;save();document.getElementById('save').classList.remove('on');setEss(S.ess);renderColl();renderDeck();renderCats();renderTasks();renderDiario();renderTorre();updMute();toast('Salvataggio caricato!');}catch(e){toast('Codice non valido');}};
 
 /* ---- battaglia (Hearthstone-like ridotto) ---- */
 var BATTLE={
