@@ -14,9 +14,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--ind:#13112a;--ind2:#1a1838;--blk:#0b0a1c;--cream:#ead7a3;--lava:#e8743b;--mut:#8a83b8}
-body{background:#07060f;font-family:'Pixelify Sans',sans-serif;color:#cdbef0;display:flex;justify-content:center;min-height:100vh}
+body{background:#07060f;font-family:'Pixelify Sans',sans-serif;color:#cdbef0;display:flex;justify-content:center;min-height:100vh;min-height:100dvh}
 .arc{font-family:'Press Start 2P',monospace}
-#app{width:100%;max-width:720px;min-height:100vh;background:var(--ind);display:flex;flex-direction:column;position:relative;overflow:hidden}
+#app{width:100%;max-width:720px;height:100vh;height:100dvh;background:var(--ind);display:flex;flex-direction:column;position:relative;overflow:hidden}
 #top{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--blk);border-bottom:2px solid #000;gap:8px}
 #top .ttl{font-weight:700;color:var(--cream);font-size:14px;letter-spacing:1px;cursor:pointer}
 .tright{display:flex;align-items:center;gap:8px}
@@ -391,7 +391,7 @@ textarea.code{width:100%;height:90px;background:var(--blk);border:2px solid #000
   <div class="ov" id="btut"><div class="panel">
     <h2>Come si combatte</h2>
     <div class="rule"><span class="e">1</span><span>Nel tuo turno giochi le <b>carte</b> dalla mano: costano <b>energia</b> (i diamanti blu), che cresce di 1 ogni turno.</span></div>
-    <div class="rule"><span class="e">2</span><span>Le <b>creature</b> non possono attaccare il turno in cui le giochi — tranne quelle con <b>Rapidità</b>.</span></div>
+    <div class="rule"><span class="e">2</span><span>Le <b>creature</b> non possono attaccare il turno in cui le giochi — tranne quelle con <b>Scatto</b>.</span></div>
     <div class="rule"><span class="e">3</span><span><b>Attacco</b>: tocca le tue creature pronte (le selezioni), poi premi <b>«Attacca»</b>. L'avversario può <b>bloccare</b>; i danni non bloccati colpiscono i suoi PV.</span></div>
     <div class="rule"><span class="e">4</span><span><b>Difesa</b>: quando l'avversario attacca, tocca una tua creatura e poi l'attaccante per <b>bloccarlo</b>. Una creatura che ha attaccato è <b>impegnata</b> e non può difendere.</span></div>
     <div class="rule"><span class="e">★</span><span>Ogni creatura ha <b>Attacco</b> (gemma arancione) e <b>Vita</b> (gemma rossa). Porta i <b>PV</b> dell'avversario a <b>0</b> per vincere.</span></div>
